@@ -2,6 +2,8 @@ package org.hyperskill.photoeditor
 
 import android.app.Activity
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
@@ -12,17 +14,29 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.slider.Slider
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var selectedImage: ImageView
     public lateinit var resultLauncher: ActivityResultLauncher<Intent>
+    private lateinit var brightnessSlider: Slider
+    private lateinit var defaultImageBitMap: Bitmap
+    private val coroutineScope = CoroutineScope(Dispatchers.Main)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         bindViews()
+
+        brightnessSlider.addOnChangeListener { slider, value, fromUser ->
+            setBrightnessValue()
+        }
 
         resultLauncher = registerForActivityResult(StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
@@ -38,6 +52,7 @@ class MainActivity : AppCompatActivity() {
         //val imageFileName = "JPEG_" + timeStamp + "." + getFileExt(contentUri)
         //Log.d("tag", "onActivityResult: Gallery Image Uri:  $imageFileName")
         selectedImage!!.setImageURI(contentUri)
+        defaultImageBitMap = (selectedImage.getDrawable() as BitmapDrawable).bitmap
     }
 
     private fun getFileExt(contentUri: Uri?): String? {
@@ -46,9 +61,26 @@ class MainActivity : AppCompatActivity() {
         return mime.getExtensionFromMimeType(c.getType(contentUri!!))
     }
 
+    private fun setBrightnessValue() {
+        if(!this::defaultImageBitMap.isInitialized) return
+
+        brightnessValue = brightnessSlider.value.toDouble()
+
+        val bitmap = defaultImageBitMap
+        val filteredBitmap = applyBrightnessFilter(bitmap)
+        loadImage(filteredBitmap)
+    }
+
+    private fun applyBrightnessFilter(originalBitmap: Bitmap) = BrightnessFilter.apply(originalBitmap)
+
+    private fun loadImage(bmp: Bitmap) {
+        selectedImage.setImageBitmap(bmp)
+    }
+
 
     private fun bindViews() {
         selectedImage = findViewById(R.id.ivPhoto)
+        brightnessSlider = findViewById(R.id.slBrightness)
     }
 
     fun openGallery(view: View) {
@@ -57,5 +89,9 @@ class MainActivity : AppCompatActivity() {
             MediaStore.Images.Media.EXTERNAL_CONTENT_URI
         )
         resultLauncher.launch(i)
+    }
+
+    companion object {
+        var brightnessValue = 0.0
     }
 }
