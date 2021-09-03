@@ -41,6 +41,6 @@ object BrightnessFilter {
     }
 
     fun changeBrightness(colorValue:Int, filterValue:Double):Int {
-        return Math.min(colorValue * filterValue, 255.0).toInt()
+        return Math.max(Math.min(colorValue * filterValue, 255.0),0.0).toInt()
     }
 }
