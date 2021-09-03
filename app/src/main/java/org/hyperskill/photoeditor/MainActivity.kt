@@ -1,12 +1,16 @@
 package org.hyperskill.photoeditor
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
+import android.media.MediaScannerConnection
 import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.provider.MediaStore
+import android.util.Log
 import android.view.View
 import android.webkit.MimeTypeMap
 import android.widget.ImageView
@@ -14,7 +18,10 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.graphics.drawable.toBitmap
 import com.google.android.material.slider.Slider
+import java.io.File
+import java.io.FileOutputStream
 
 
 class MainActivity : AppCompatActivity() {
@@ -84,6 +91,31 @@ class MainActivity : AppCompatActivity() {
             MediaStore.Images.Media.EXTERNAL_CONTENT_URI
         )
         resultLauncher.launch(i)
+    }
+
+    fun savePhoto(view: View) {
+        val bitmap = selectedImage.getDrawable().toBitmap()
+
+        var outStream: FileOutputStream? = null
+        val path = this.getExternalFilesDir(null)?.path?.split("/Android")?.get(0);
+        val filePath = path + "/Pictures"
+        Log.d("tag", "onActivityResult: filePath:  $filePath")
+        val dir = File(filePath)
+        dir.mkdirs()
+        val fileName = String.format("%d.jpg", System.currentTimeMillis())
+        val outFile = File(dir, fileName)
+        outStream = FileOutputStream(outFile)
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outStream)
+        outStream.flush()
+        outStream.close()
+
+        scanFile(this, filePath)
+    }
+
+    private fun scanFile(context: Context, filePath:String) {
+        val file = File(filePath)
+        MediaScannerConnection.scanFile(context, arrayOf(file.toString()),
+            null, null)
     }
 
     companion object {
