@@ -8,7 +8,6 @@ import android.graphics.drawable.BitmapDrawable
 import android.media.MediaScannerConnection
 import android.net.Uri
 import android.os.Bundle
-import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
 import android.view.View
@@ -22,6 +21,10 @@ import androidx.core.graphics.drawable.toBitmap
 import com.google.android.material.slider.Slider
 import java.io.File
 import java.io.FileOutputStream
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 
 
 class MainActivity : AppCompatActivity() {
@@ -30,6 +33,7 @@ class MainActivity : AppCompatActivity() {
     public lateinit var resultLauncher: ActivityResultLauncher<Intent>
     private lateinit var brightnessSlider: Slider
     private lateinit var defaultImageBitMap: Bitmap
+    private val coroutineScope = CoroutineScope(Dispatchers.Main)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -68,9 +72,20 @@ class MainActivity : AppCompatActivity() {
 
         brightnessValue = brightnessSlider.value.toDouble()
 
-        val bitmap = defaultImageBitMap
-        val filteredBitmap = applyBrightnessFilter(bitmap)
-        loadImage(filteredBitmap)
+        coroutineScope.launch {
+            // defer the call to the Dispatchers IO coroutine scope
+            val bitmap = defaultImageBitMap
+            // to apply the filter requires some processing  which should not be done on the main thread
+            val filteredDeferred = coroutineScope.async(Dispatchers.Default) {
+                // filter needs to be done after we have received the original bitmap
+                applyBrightnessFilter(bitmap)
+            }
+
+            // await the filter to be applied to the original image
+            val filteredBitmap = filteredDeferred.await()
+            // load the filtered image once we have it
+            loadImage(filteredBitmap)
+        }
     }
 
     private fun applyBrightnessFilter(originalBitmap: Bitmap) = BrightnessFilter.apply(originalBitmap)
