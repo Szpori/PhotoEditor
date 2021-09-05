@@ -32,6 +32,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var selectedImage: ImageView
     public lateinit var resultLauncher: ActivityResultLauncher<Intent>
     private lateinit var brightnessSlider: Slider
+    private lateinit var contrastSlider: Slider
     private lateinit var defaultImageBitMap: Bitmap
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
 
@@ -41,7 +42,10 @@ class MainActivity : AppCompatActivity() {
         bindViews()
 
         brightnessSlider.addOnChangeListener { slider, value, fromUser ->
-            setBrightnessValue()
+            applyFilterChange()
+        }
+        contrastSlider.addOnChangeListener { slider, value, fromUser ->
+            applyFilterChange()
         }
 
         resultLauncher = registerForActivityResult(StartActivityForResult()) { result ->
@@ -67,9 +71,11 @@ class MainActivity : AppCompatActivity() {
         return mime.getExtensionFromMimeType(c.getType(contentUri!!))
     }
 
-    private fun setBrightnessValue() {
+    private fun applyFilterChange() {
+
         if(!this::defaultImageBitMap.isInitialized) return
 
+        beta = contrastSlider.value.toDouble()
         brightnessValue = brightnessSlider.value.toDouble()
 
         coroutineScope.launch {
@@ -78,7 +84,7 @@ class MainActivity : AppCompatActivity() {
             // to apply the filter requires some processing  which should not be done on the main thread
             val filteredDeferred = coroutineScope.async(Dispatchers.Default) {
                 // filter needs to be done after we have received the original bitmap
-                applyBrightnessFilter(bitmap)
+                applyContrastBrightnessFilter(bitmap)
             }
 
             // await the filter to be applied to the original image
@@ -88,7 +94,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun applyBrightnessFilter(originalBitmap: Bitmap) = BrightnessFilter.apply(originalBitmap)
+    private fun applyContrastBrightnessFilter(originalBitmap: Bitmap) = ContrastBrightnessFilter.apply(originalBitmap)
 
     private fun loadImage(bmp: Bitmap) {
         selectedImage.setImageBitmap(bmp)
@@ -98,6 +104,7 @@ class MainActivity : AppCompatActivity() {
     private fun bindViews() {
         selectedImage = findViewById(R.id.ivPhoto)
         brightnessSlider = findViewById(R.id.slBrightness)
+        contrastSlider = findViewById(R.id.slContrast)
     }
 
     fun openGallery(view: View) {
@@ -135,5 +142,7 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         var brightnessValue = 0.0
+        var gaussianRadius = 9
+        var beta = 0.0
     }
 }
