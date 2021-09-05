@@ -53,16 +53,16 @@ class ExampleUnitTest {
         assertNotNull(message, slBrightness)
 
         val message2 = "\"slider\" should have proper stepSize attribute"
-        assertEquals(message2, slBrightness.stepSize, 0.1f)
+        assertEquals(message2, slBrightness.stepSize, 10f)
 
         val message3 = "\"slider\" should have proper valueFrom attribute"
-        assertEquals(message3, slBrightness.valueFrom, 0.2f)
+        assertEquals(message3, slBrightness.valueFrom, -250f)
 
         val message4 = "\"slider\" should have proper valueTo attribute"
-        assertEquals(message4, slBrightness.valueTo, 1.8f)
+        assertEquals(message4, slBrightness.valueTo, 250f)
 
         val message5 = "\"slider\" should have proper initial value"
-        assertEquals(message5, 1.0f, slBrightness.value)
+        assertEquals(message5, slBrightness.value, 0f)
     }
 
     @Test
