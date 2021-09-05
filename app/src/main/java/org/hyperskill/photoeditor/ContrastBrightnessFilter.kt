@@ -3,7 +3,7 @@ package org.hyperskill.photoeditor
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.util.Log
-import org.hyperskill.photoeditor.MainActivity.Companion.beta
+import org.hyperskill.photoeditor.MainActivity.Companion.contrast
 import org.hyperskill.photoeditor.MainActivity.Companion.brightnessValue
 
 object ContrastBrightnessFilter {
@@ -21,7 +21,7 @@ object ContrastBrightnessFilter {
         var index: Int
 
 
-        var alpha = (255+beta)/(255-beta)
+        var alpha = (255+contrast)/(255-contrast)
         var u_mean = calculateBrightness(source)
 
         Log.d("tag", "contrast: Mean:  $u_mean")

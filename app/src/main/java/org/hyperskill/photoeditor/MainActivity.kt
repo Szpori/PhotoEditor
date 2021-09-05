@@ -75,7 +75,7 @@ class MainActivity : AppCompatActivity() {
 
         if(!this::defaultImageBitMap.isInitialized) return
 
-        beta = contrastSlider.value.toDouble()
+        contrast = contrastSlider.value.toDouble()
         brightnessValue = brightnessSlider.value.toDouble()
 
         coroutineScope.launch {
@@ -143,6 +143,6 @@ class MainActivity : AppCompatActivity() {
     companion object {
         var brightnessValue = 0.0
         var gaussianRadius = 9
-        var beta = 0.0
+        var contrast = 0.0
     }
 }
