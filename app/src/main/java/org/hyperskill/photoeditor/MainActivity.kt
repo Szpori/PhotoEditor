@@ -33,6 +33,8 @@ class MainActivity : AppCompatActivity() {
     public lateinit var resultLauncher: ActivityResultLauncher<Intent>
     private lateinit var brightnessSlider: Slider
     private lateinit var contrastSlider: Slider
+    private lateinit var saturationSlider: Slider
+    private lateinit var gammaSlider: Slider
     private lateinit var defaultImageBitMap: Bitmap
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
 
@@ -45,6 +47,12 @@ class MainActivity : AppCompatActivity() {
             applyFilterChange()
         }
         contrastSlider.addOnChangeListener { slider, value, fromUser ->
+            applyFilterChange()
+        }
+        saturationSlider.addOnChangeListener { slider, value, fromUser ->
+            applyFilterChange()
+        }
+        gammaSlider.addOnChangeListener { slider, value, fromUser ->
             applyFilterChange()
         }
 
@@ -78,6 +86,9 @@ class MainActivity : AppCompatActivity() {
 
         contrast = contrastSlider.value.toDouble()
         brightnessValue = brightnessSlider.value.toDouble()
+        saturation = saturationSlider.value.toDouble()
+        gamma = gammaSlider.value.toDouble()
+
 
         coroutineScope.launch {
             // defer the call to the Dispatchers IO coroutine scope
@@ -106,6 +117,8 @@ class MainActivity : AppCompatActivity() {
         selectedImage = findViewById(R.id.ivPhoto)
         brightnessSlider = findViewById(R.id.slBrightness)
         contrastSlider = findViewById(R.id.slContrast)
+        saturationSlider = findViewById(R.id.slSaturation)
+        gammaSlider = findViewById(R.id.slGamma)
     }
 
     fun openGallery(view: View) {
@@ -165,5 +178,7 @@ class MainActivity : AppCompatActivity() {
     companion object {
         var brightnessValue = 0.0
         var contrast = 0.0
+        var saturation = 0.0
+        var gamma = 1.0
     }
 }

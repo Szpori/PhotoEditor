@@ -5,6 +5,8 @@ import android.graphics.Color
 import android.util.Log
 import org.hyperskill.photoeditor.MainActivity.Companion.contrast
 import org.hyperskill.photoeditor.MainActivity.Companion.brightnessValue
+import org.hyperskill.photoeditor.MainActivity.Companion.gamma
+import org.hyperskill.photoeditor.MainActivity.Companion.saturation
 
 object ContrastBrightnessFilter {
 
@@ -21,11 +23,12 @@ object ContrastBrightnessFilter {
         var index: Int
 
 
-        var alpha = (255+contrast)/(255-contrast)
+        var alpha1 = (255+contrast)/(255-contrast)
+        var alpha2 = (255+saturation)/(255-saturation)
         var u_mean = calculateBrightness(source)
 
         Log.d("tag", "contrast: Mean:  $u_mean")
-        Log.d("tag", "contrast: Alpha:  $alpha")
+        Log.d("tag", "contrast: Alpha:  $alpha1")
 
         for (y in 0 until height) {
             for (x in 0 until width) {
@@ -36,10 +39,23 @@ object ContrastBrightnessFilter {
                 G = Color.green(pixels[index])
                 B = Color.blue(pixels[index])
 
-                pixels[index] = Color.rgb(
-                    checkBounds(alpha*(R - u_mean) + u_mean + brightnessValue),
-                    checkBounds(alpha*(G - u_mean) + u_mean + brightnessValue),
-                    checkBounds(alpha*(B - u_mean) + u_mean + brightnessValue))
+                val u = (R+G+B).toDouble()/3
+
+                R = checkBounds((alpha2*(R - u) + u) + brightnessValue)
+                G = checkBounds((alpha2*(G - u) + u) + brightnessValue)
+                B = checkBounds((alpha2*(B - u) + u) + brightnessValue)
+
+                R = checkBounds((alpha1*(R - u_mean) + u_mean))
+                G = checkBounds((alpha1*(G - u_mean) + u_mean))
+                B = checkBounds((alpha1*(B - u_mean) + u_mean))
+
+                // r_ = 255 * (r/255)**gamma
+
+                R = (255 * Math.pow(R/255.0, gamma)).toInt()
+                G = (255 * Math.pow(G/255.0, gamma)).toInt()
+                B = (255 * Math.pow(B/255.0, gamma)).toInt()
+
+                pixels[index] = Color.rgb(R,G,B)
 
             }
         }
