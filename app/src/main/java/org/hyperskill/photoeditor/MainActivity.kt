@@ -63,6 +63,7 @@ class MainActivity : AppCompatActivity() {
         //Log.d("tag", "onActivityResult: Gallery Image Uri:  $imageFileName")
         selectedImage!!.setImageURI(contentUri)
         defaultImageBitMap = (selectedImage.getDrawable() as BitmapDrawable).bitmap
+        defaultImageBitMap = resize(defaultImageBitMap, 1224, 1632)
     }
 
     private fun getFileExt(contentUri: Uri?): String? {
@@ -140,9 +141,29 @@ class MainActivity : AppCompatActivity() {
             null, null)
     }
 
+    private fun resize(image: Bitmap, maxWidth: Int, maxHeight: Int): Bitmap {
+        var image = image
+        val width = image.width
+        val height = image.height
+        return if (maxHeight < height || maxWidth < width) {
+            val ratioBitmap = width.toFloat() / height.toFloat()
+            val ratioMax = maxWidth.toFloat() / maxHeight.toFloat()
+            var finalWidth = maxWidth
+            var finalHeight = maxHeight
+            if (ratioMax > ratioBitmap) {
+                finalWidth = (maxHeight.toFloat() * ratioBitmap).toInt()
+            } else {
+                finalHeight = (maxWidth.toFloat() / ratioBitmap).toInt()
+            }
+            image = Bitmap.createScaledBitmap(image, finalWidth, finalHeight, true)
+            image
+        } else {
+            image
+        }
+    }
+
     companion object {
         var brightnessValue = 0.0
-        var gaussianRadius = 9
         var contrast = 0.0
     }
 }
