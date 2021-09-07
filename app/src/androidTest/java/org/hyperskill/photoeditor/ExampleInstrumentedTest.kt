@@ -34,7 +34,7 @@ class MainActivityTest{
     val intentsTestRule = IntentsTestRule(MainActivity::class.java)
 
     @Test
-    fun  test_validateIntentSentToPickPackage() {
+    fun testShouldCheckGalleryButtonOpensGallery() {
 
         // GIVEN
         val expectedIntent: Matcher<Intent> = allOf(
@@ -49,21 +49,8 @@ class MainActivityTest{
         intended(expectedIntent)
     }
 
-    private fun createGalleryPickActivityResultStub(): ActivityResult {
-        val resources: Resources = InstrumentationRegistry.getInstrumentation().context.resources
-        val imageUri = Uri.parse(
-            ContentResolver.SCHEME_ANDROID_RESOURCE + "://" +
-                    resources.getResourcePackageName(R.drawable.ic_launcher_background) + '/' +
-                    resources.getResourceTypeName(R.drawable.ic_launcher_background) + '/' +
-                    resources.getResourceEntryName(R.drawable.ic_launcher_background)
-        )
-        val resultIntent = Intent()
-        resultIntent.setData(imageUri)
-        return ActivityResult(RESULT_OK, resultIntent)
-    }
-
     @Test
-    fun test_picture_set() {
+    fun testShouldCheckImageLoading() {
 
         // GIVEN
         val expectedIntent: Matcher<Intent> = allOf(
@@ -79,5 +66,18 @@ class MainActivityTest{
         intended(expectedIntent)
         onView(withId(R.id.ivPhoto)).check(matches(hasDrawable()))
 
+    }
+
+    private fun createGalleryPickActivityResultStub(): ActivityResult {
+        val resources: Resources = InstrumentationRegistry.getInstrumentation().context.resources
+        val imageUri = Uri.parse(
+            ContentResolver.SCHEME_ANDROID_RESOURCE + "://" +
+                    resources.getResourcePackageName(R.drawable.ic_launcher_background) + '/' +
+                    resources.getResourceTypeName(R.drawable.ic_launcher_background) + '/' +
+                    resources.getResourceEntryName(R.drawable.ic_launcher_background)
+        )
+        val resultIntent = Intent()
+        resultIntent.setData(imageUri)
+        return ActivityResult(RESULT_OK, resultIntent)
     }
 }

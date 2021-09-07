@@ -25,7 +25,6 @@ class ExampleUnitTest {
         val message = "does view with id \"ivPhoto\" placed in activity?"
 
         assertNotNull(message, ivPhoto)
-
     }
 
     @Test
@@ -45,16 +44,6 @@ class ExampleUnitTest {
 
         val message = "does view with id \"btnGalllery\" placed in activity?"
         assertNotNull(message, btnGallery)
-    }
-
-    @Test
-    fun testShouldCheckButtonOnClick() {
-        val activity = activityController.setup().get()
-        val btnGallery = activity.findViewById<Button>(R.id.btnGallery)
-        val ivPhoto = activity.findViewById<ImageView>(R.id.ivPhoto)
-        btnGallery.callOnClick()
-
-
     }
 
 }
