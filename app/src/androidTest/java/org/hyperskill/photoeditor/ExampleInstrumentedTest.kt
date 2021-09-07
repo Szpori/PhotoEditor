@@ -78,5 +78,6 @@ class MainActivityTest{
         onView(withId(R.id.btnGallery)).perform(click())
         intended(expectedIntent)
         onView(withId(R.id.ivPhoto)).check(matches(hasDrawable()))
+
     }
 }

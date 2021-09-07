@@ -15,7 +15,7 @@ object ImageViewHasDrawableMatcher {
             }
 
             override fun matchesSafely(item: ImageView?): Boolean {
-                return item?.getDrawable() != null;
+                return item?.drawable != null;
             }
 
         }
