@@ -14,7 +14,7 @@ import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class ExampleUnitTest {
+class UnitTestStage1 {
 
     private val activityController = Robolectric.buildActivity(MainActivity::class.java)
 
