@@ -28,7 +28,7 @@ import org.junit.runner.RunWith
 
 
 @RunWith(AndroidJUnit4ClassRunner::class)
-class MainActivityTest{
+class Stage1InstrumentedTest{
 
     @get:Rule
     val intentsTestRule = IntentsTestRule(MainActivity::class.java)
