@@ -1,12 +1,7 @@
 package org.hyperskill.photoeditor
 
-import android.graphics.Bitmap
-import android.graphics.drawable.BitmapDrawable
 import android.widget.Button
 import android.widget.ImageView
-import androidx.activity.result.ActivityResultRegistry
-import androidx.activity.result.contract.ActivityResultContract
-import androidx.core.app.ActivityOptionsCompat
 import org.junit.Assert.*
 import org.junit.Test
 import org.junit.runner.RunWith

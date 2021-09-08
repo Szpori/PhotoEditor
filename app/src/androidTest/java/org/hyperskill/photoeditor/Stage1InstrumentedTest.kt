@@ -41,6 +41,7 @@ class Stage1InstrumentedTest{
             hasAction(Intent.ACTION_PICK),
             hasData(MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
         )
+
         val activityResult = createGalleryPickActivityResultStub()
         intending(expectedIntent).respondWith(activityResult)
 
@@ -51,7 +52,6 @@ class Stage1InstrumentedTest{
 
     @Test
     fun testShouldCheckImageLoading() {
-
         // GIVEN
         val expectedIntent: Matcher<Intent> = allOf(
             hasAction(Intent.ACTION_PICK),
@@ -65,19 +65,19 @@ class Stage1InstrumentedTest{
         onView(withId(R.id.btnGallery)).perform(click())
         intended(expectedIntent)
         onView(withId(R.id.ivPhoto)).check(matches(hasDrawable()))
-
     }
 
     private fun createGalleryPickActivityResultStub(): ActivityResult {
         val resources: Resources = InstrumentationRegistry.getInstrumentation().context.resources
-        val imageUri = Uri.parse(
-            ContentResolver.SCHEME_ANDROID_RESOURCE + "://" +
-                    resources.getResourcePackageName(R.drawable.ic_launcher_background) + '/' +
-                    resources.getResourceTypeName(R.drawable.ic_launcher_background) + '/' +
-                    resources.getResourceEntryName(R.drawable.ic_launcher_background)
-        )
+        val imageUri = Uri.Builder()
+            .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
+            .authority(resources.getResourcePackageName(R.drawable.download))
+            .appendPath(resources.getResourceTypeName(R.drawable.download))
+            .appendPath(resources.getResourceEntryName(R.drawable.download))
+            .build()
         val resultIntent = Intent()
         resultIntent.setData(imageUri)
         return ActivityResult(RESULT_OK, resultIntent)
     }
+
 }
