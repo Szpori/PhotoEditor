@@ -38,6 +38,9 @@ class MainActivity : AppCompatActivity() {
                 setPhoto(result)
             }
         }
+
+        //selectedImage!!.setImageResource(R.drawable.download)
+        //defaultImageBitMap = (selectedImage.getDrawable() as BitmapDrawable).bitmap
     }
 
     private fun setPhoto(result: ActivityResult) {
