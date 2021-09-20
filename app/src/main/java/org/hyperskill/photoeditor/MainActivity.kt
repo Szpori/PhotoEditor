@@ -1,6 +1,8 @@
 package org.hyperskill.photoeditor
 
 import android.app.Activity
+import android.content.ContentResolver
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
@@ -39,8 +41,20 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        //val contentUri = resourceToUri(this,R.drawable.download)
+        //selectedImage!!.setImageURI(contentUri)
+        //defaultImageBitMap = (selectedImage.getDrawable() as BitmapDrawable).bitmap
         //selectedImage!!.setImageResource(R.drawable.download)
         //defaultImageBitMap = (selectedImage.getDrawable() as BitmapDrawable).bitmap
+    }
+
+    fun resourceToUri(context: Context, resID: Int): Uri? {
+        return Uri.parse(
+            ContentResolver.SCHEME_ANDROID_RESOURCE + "://" +
+                    context.resources.getResourcePackageName(resID) + '/' +
+                    context.resources.getResourceTypeName(resID) + '/' +
+                    context.resources.getResourceEntryName(resID)
+        )
     }
 
     private fun setPhoto(result: ActivityResult) {
