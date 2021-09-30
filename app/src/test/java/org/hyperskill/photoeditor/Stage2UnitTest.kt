@@ -9,11 +9,9 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
-import android.support.annotation.AnyRes
-import android.support.annotation.NonNull
 import android.widget.Button
 import android.widget.ImageView
-import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.slider.Slider
 import org.junit.Assert.*
 import org.junit.Test
@@ -22,6 +20,10 @@ import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows
 import org.robolectric.shadows.ShadowActivity
+import java.io.File
+import java.net.URL
+import android.graphics.BitmapFactory
+import org.hamcrest.CoreMatchers.notNullValue
 
 
 @RunWith(RobolectricTestRunner::class)
@@ -69,38 +71,16 @@ class Stage2UnitTest {
 
     @Test
     fun testShouldCheckSliderWorkingWithImage() {
-
-
         val activity = activityController.setup().get()
         val slBrightness = activity.findViewById<Slider>(R.id.slBrightness)
         val ivPhoto = activity.findViewById<ImageView>(R.id.ivPhoto)
-        val btnGallery = activity.findViewById<Button>(R.id.btnGallery)
 
-        btnGallery.performClick()
+        var img0 = (ivPhoto.getDrawable() as BitmapDrawable).bitmap
 
+        //var img0 = getBitmapFromPath(this, "myexample.jpg")
+        //img0?.let { pureBlack(it) }?.let { assertTrue(it) }
 
-        val shadowActivity: ShadowActivity = Shadows.shadowOf(activity)
-
-        // Determine if two intents are the same for the purposes of intent resolution (filtering).
-        // That is, if their action, data, type, class, and categories are the same. This does
-        // not compare any extra data included in the intents
-
-        val activityResult = createGalleryPickActivityResultStub2(activity)
-
-        val intent = shadowActivity!!.peekNextStartedActivityForResult().intent
-
-        Shadows.shadowOf(activity).receiveResult(
-            intent,
-            Activity.RESULT_OK,
-            activityResult)
-
-
-        //launcher.dispatchResult(Activity.RESULT_OK, Activity.RESULT_OK, activityResult)
-        assertNotNull(ivPhoto.drawable)
-        assertEquals(R.drawable.myexample2, Shadows.shadowOf(ivPhoto.getDrawable()).getCreatedFromResId())
-
-        val img0 = (ivPhoto.getDrawable() as BitmapDrawable).bitmap
-        val RGB0 = singleColor(img0)
+        val RGB0 = img0?.let { singleColor(it) }
 
         slBrightness.value += slBrightness.stepSize*2
 
@@ -108,26 +88,36 @@ class Stage2UnitTest {
         val RGB2 = singleColor(img2)
 
 
+
         val message2 = "val1 ${RGB0} val2 ${RGB2}"
         print(message2)
         //assertEquals(img1Hash, img10Hash)
-        assertEquals(message2,RGB0.first+slBrightness.stepSize*2, RGB2.first.toFloat())
-        assertEquals(message2,RGB0.second+slBrightness.stepSize*2, RGB2.second.toFloat())
-        assertEquals(message2,RGB0.third+slBrightness.stepSize*2, RGB2.third.toFloat())
+        if (RGB0 != null) {
+            assertEquals(message2,RGB0.first+slBrightness.stepSize*2, RGB2.first.toFloat())
+        }
+    }
 
-        assertNotEquals(message2,RGB0.first+slBrightness.stepSize*2, RGB2.first.toFloat())
+    fun resourceToUri(context: Context, resID: Int): Uri? {
+        return Uri.parse(
+            ContentResolver.SCHEME_ANDROID_RESOURCE + "://" +
+                    context.resources.getResourcePackageName(resID) + '/' +
+                    context.resources.getResourceTypeName(resID) + '/' +
+                    context.resources.getResourceEntryName(resID)
+        )
     }
 
     @Test
     @Throws(Exception::class)
     fun testGetDrawable_rainbow() {
-        assertNotNull(1
-            //ApplicationProvider.getApplicationContext<Context>().resources.getDrawable(R.drawable.download)
+        assertNotNull(
+            ApplicationProvider.getApplicationContext<Context>().resources.getDrawable(R.drawable.myexample)
         )
     }
 
     private fun createGalleryPickActivityResultStub2(activity: MainActivity): Intent {
-        val resources: Resources = InstrumentationRegistry.getInstrumentation().context.resources
+        //val resources: Resources = InstrumentationRegistry.getInstrumentation().context.resources
+        val resources: Resources = ApplicationProvider.getApplicationContext<Context>().resources
+
         val imageUri = Uri.Builder()
             .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
             .authority(resources.getResourcePackageName(R.drawable.myexample2))
@@ -135,21 +125,40 @@ class Stage2UnitTest {
             .appendPath(resources.getResourceEntryName(R.drawable.myexample2))
             .build()
         val resultIntent = Intent()
-        val uri = getUriToDrawable(activity,R.drawable.myexample2)
-        resultIntent.setData(uri)
+        //val uri = getUriToDrawable(activity,R.drawable.myexample2)
+        resultIntent.setData(imageUri)
         return resultIntent
     }
 
-    fun getUriToDrawable(
-        @NonNull context: Context,
-        @AnyRes drawableId: Int
-    ): Uri {
-        return Uri.parse(
-            ContentResolver.SCHEME_ANDROID_RESOURCE +
-                    "://" + context.getResources().getResourcePackageName(drawableId)
-                    + '/' + context.getResources().getResourceTypeName(drawableId)
-                    + '/' + context.getResources().getResourceEntryName(drawableId)
-        )
+    fun pureBlack(source: Bitmap): Boolean {
+        val width = source.width
+        val height = source.height
+        val pixels = IntArray(width * height)
+        // get pixel array from source
+        source.getPixels(pixels, 0, width, 0, 0, width, height)
+
+        var R: Int
+        var G: Int
+        var B: Int
+        var index: Int
+
+        for (y in 0 until height) {
+            for (x in 0 until width) {
+                // get current index in 2D-matrix
+                index = y * width + x
+                // get color
+                R = Color.red(pixels[index])
+                G = Color.green(pixels[index])
+                B = Color.blue(pixels[index])
+
+               if(R != 0) return false
+                if(G != 0) return false
+                if(B != 0) return false
+
+            }
+        }
+
+        return true
     }
 
     fun singleColor(source: Bitmap): Triple<Int, Int, Int> {
@@ -163,16 +172,33 @@ class Stage2UnitTest {
         var R: Int
         var G: Int
         var B: Int
-        var y = 120
-        var x = 120
+        var y = 80
+        var x = 80
 
         index = y * width + x
         // get color
-        R = Color.green(pixels[index])
+        R = Color.red(pixels[index])
         G = Color.green(pixels[index])
-        B = Color.green(pixels[index])
+        B = Color.blue(pixels[index])
 
-        return  Triple( R, G, B)
+        return  Triple(R,G,B)
+    }
+
+
+    private fun getBitmapFromPath(obj: Any, fileName: String): Bitmap? {
+        val classLoader = obj.javaClass.classLoader
+        val resource: URL = classLoader!!.getResource(fileName)
+        val bitmap = BitmapFactory.decodeFile(resource.getPath())
+        return bitmap
+    }
+
+    @Test
+    @Throws(java.lang.Exception::class)
+    fun fileObjectShouldNotBeNull() {
+        val bitmap = getBitmapFromPath(this, "myexample.jpg")
+        assertThat(bitmap, notNullValue())
+
+
     }
 
 }
