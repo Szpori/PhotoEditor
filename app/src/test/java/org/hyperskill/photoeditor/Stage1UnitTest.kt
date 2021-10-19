@@ -139,20 +139,4 @@ class Stage1UnitTest {
         resultIntent.setData(imageUri)
         return resultIntent
     }
-
-    private fun createGalleryPickActivityResultStub(): Instrumentation.ActivityResult {
-        val resources: Resources = InstrumentationRegistry.getInstrumentation().context.resources
-        val imageUri = Uri.Builder()
-            .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
-            .authority(resources.getResourcePackageName(R.drawable.myexample))
-            .appendPath(resources.getResourceTypeName(R.drawable.myexample))
-            .appendPath(resources.getResourceEntryName(R.drawable.myexample))
-            .build()
-        val resultIntent = Intent()
-        resultIntent.setData(imageUri)
-        return Instrumentation.ActivityResult(Activity.RESULT_OK, resultIntent)
-    }
-
-
-
 }
