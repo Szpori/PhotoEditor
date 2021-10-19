@@ -45,13 +45,13 @@ class Stage1UnitTest {
     }
 
     @Test
-    fun testShouldCheckImageViewImageEmpty() {
+    fun testShouldCheckImageViewImageNotEmpty() {
         val activity = activityController.setup().get()
         val ivPhoto = activity.findViewById<ImageView>(R.id.ivPhoto)
         val drawable = (ivPhoto.drawable)
         val message2 = "is \"ivPhoto\" empty?"
 
-        assertNull(message2, drawable)
+        assertNotNull(message2, drawable)
     }
 
     @Test
