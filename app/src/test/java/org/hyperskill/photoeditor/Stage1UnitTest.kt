@@ -63,9 +63,9 @@ class Stage1UnitTest {
         val activity = activityController.setup().get()
         val ivPhoto = activity.findViewById<ImageView>(R.id.ivPhoto)
         val drawable = (ivPhoto.drawable)
-        val message2 = "is \"ivPhoto\" empty?"
+        val message2 = "is \"ivPhoto\" not empty?"
 
-        assertNull(message2, drawable)
+        assertNotNull(message2, drawable)
     }
 
     @Test
@@ -107,14 +107,7 @@ class Stage1UnitTest {
         val ivPhoto = activity.findViewById<ImageView>(R.id.ivPhoto)
         btnGallery.performClick()
 
-        // An Android "Activity" doesn't expose a way to find out about activities it launches
-        // Robolectric's "ShadowActivity" keeps track of all launched activities and exposes this information
-        // through the "getNextStartedActivity" method.
         val shadowActivity: ShadowActivity = Shadows.shadowOf(activity)
-
-        // Determine if two intents are the same for the purposes of intent resolution (filtering).
-        // That is, if their action, data, type, class, and categories are the same. This does
-        // not compare any extra data included in the intents
 
         val activityResult = createGalleryPickActivityResultStub2()
 
@@ -133,34 +126,6 @@ class Stage1UnitTest {
         //assertEquals(intent.data, activityResult.data)
 
     }
-
-    /*
-    @Test
-    fun testShouldCheckButtonLoadsImage() {
-        val activity = activityController.setup().get()
-        val ivPhoto = activity.findViewById<ImageView>(R.id.ivPhoto)
-        val btnGallery = activity.findViewById<Button>(R.id.btnGallery)
-
-        // The intent we expect to be launched when a user clicks on the button
-        val expectedIntent = Intent(
-            Intent.ACTION_PICK,
-            MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-
-        val activityResult = createGalleryPickActivityResultStub()
-        ivPhoto.setImageURI(activityResult.resultData.data)
-        //intended(expectedIntent).respondWith(activityResult)
-
-        //expectedIntent
-
-        btnGallery.performClick()
-
-        assertNotNull(ivPhoto.drawable)
-
-        assertEquals(R.drawable.myexample, Shadows.shadowOf(ivPhoto.getDrawable()).getCreatedFromResId());
-
-    }
-
-     */
 
     private fun createGalleryPickActivityResultStub2(): Intent {
         val resources: Resources = InstrumentationRegistry.getInstrumentation().context.resources

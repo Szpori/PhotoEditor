@@ -3,7 +3,7 @@ package org.hyperskill.photoeditor
 import android.app.Activity
 import android.content.Intent
 import android.graphics.Bitmap
-import android.graphics.drawable.BitmapDrawable
+import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
@@ -18,8 +18,8 @@ import androidx.appcompat.app.AppCompatActivity
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var selectedImage: ImageView
-    public lateinit var resultLauncher: ActivityResultLauncher<Intent>
+    private lateinit var currentImage: ImageView
+    private lateinit var resultLauncher: ActivityResultLauncher<Intent>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,15 +31,14 @@ class MainActivity : AppCompatActivity() {
                 setPhoto(result)
             }
         }
+        //do not change this line
+        currentImage.setImageBitmap(createBitmap())
     }
 
     private fun setPhoto(result: ActivityResult) {
         val data: Intent? = result.data
         val contentUri = data!!.data
-        //val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
-        //val imageFileName = "JPEG_" + timeStamp + "." + getFileExt(contentUri)
-        //Log.d("tag", "onActivityResult: Gallery Image Uri:  $imageFileName")
-        selectedImage!!.setImageURI(contentUri)
+        currentImage!!.setImageURI(contentUri)
     }
 
     private fun getFileExt(contentUri: Uri?): String? {
@@ -50,7 +49,7 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun bindViews() {
-        selectedImage = findViewById(R.id.ivPhoto)
+        currentImage = findViewById(R.id.ivPhoto)
     }
 
     fun openGallery(view: View) {
@@ -59,5 +58,36 @@ class MainActivity : AppCompatActivity() {
             MediaStore.Images.Media.EXTERNAL_CONTENT_URI
         )
         resultLauncher.launch(i)
+    }
+
+    // do not change this function
+    fun createBitmap(): Bitmap {
+        val width = 100
+        val height = 100
+        val pixels = IntArray(width * height)
+        // get pixel array from source
+
+        var R: Int
+        var G: Int
+        var B: Int
+        var index: Int
+
+        for (y in 0 until height) {
+            for (x in 0 until width) {
+                // get current index in 2D-matrix
+                index = y * width + x
+                // get color
+                R = x % 100
+                G = y % 100
+                B = (x+y) % 100
+
+                pixels[index] = Color.rgb(R,G,B)
+
+            }
+        }
+        // output bitmap
+        val bitmapOut = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565)
+        bitmapOut.setPixels(pixels, 0, width, 0, 0, width, height)
+        return bitmapOut
     }
 }
