@@ -24,16 +24,30 @@ import org.robolectric.Shadows.shadowOf
 import java.lang.Exception
 
 
+
+
+
 @RunWith(RobolectricTestRunner::class)
 class Stage1UnitTest {
 
     private val activityController = Robolectric.buildActivity(MainActivity::class.java)
+    private lateinit var res: Resources
+    private var activity: MainActivity? = null
+    private var shadowActivity: ShadowActivity? = null
+
+
+    @Before
+    @Throws(Exception::class)
+    fun setUp() {
+        // val res: Resources = ApplicationProvider.getApplicationContext<Application>().resources
+    }
 
     @Before
     fun setup() {
-        // Convenience method to run MainActivity through the Activity Lifecycle methods:
-        // onCreate(...) => onStart() => onPostCreate(...) => onResume()
+        activity = MainActivity()
+        shadowActivity = Shadows.shadowOf(activity)
     }
+
 
     @Test
     fun testShouldCheckImageViewExist() {
@@ -45,11 +59,11 @@ class Stage1UnitTest {
     }
 
     @Test
-    fun testShouldCheckImageViewImageNotEmpty() {
+    fun testShouldCheckImageViewImageEmpty() {
         val activity = activityController.setup().get()
         val ivPhoto = activity.findViewById<ImageView>(R.id.ivPhoto)
         val drawable = (ivPhoto.drawable)
-        val message2 = "is \"ivPhoto\" empty?"
+        val message2 = "is \"ivPhoto\" not empty?"
 
         assertNotNull(message2, drawable)
     }
@@ -93,14 +107,7 @@ class Stage1UnitTest {
         val ivPhoto = activity.findViewById<ImageView>(R.id.ivPhoto)
         btnGallery.performClick()
 
-        // An Android "Activity" doesn't expose a way to find out about activities it launches
-        // Robolectric's "ShadowActivity" keeps track of all launched activities and exposes this information
-        // through the "getNextStartedActivity" method.
         val shadowActivity: ShadowActivity = Shadows.shadowOf(activity)
-
-        // Determine if two intents are the same for the purposes of intent resolution (filtering).
-        // That is, if their action, data, type, class, and categories are the same. This does
-        // not compare any extra data included in the intents
 
         val activityResult = createGalleryPickActivityResultStub2()
 
@@ -132,5 +139,20 @@ class Stage1UnitTest {
         resultIntent.setData(imageUri)
         return resultIntent
     }
+
+    private fun createGalleryPickActivityResultStub(): Instrumentation.ActivityResult {
+        val resources: Resources = InstrumentationRegistry.getInstrumentation().context.resources
+        val imageUri = Uri.Builder()
+            .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
+            .authority(resources.getResourcePackageName(R.drawable.myexample))
+            .appendPath(resources.getResourceTypeName(R.drawable.myexample))
+            .appendPath(resources.getResourceEntryName(R.drawable.myexample))
+            .build()
+        val resultIntent = Intent()
+        resultIntent.setData(imageUri)
+        return Instrumentation.ActivityResult(Activity.RESULT_OK, resultIntent)
+    }
+
+
 
 }
