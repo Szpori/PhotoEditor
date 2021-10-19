@@ -212,12 +212,12 @@ class Stage2UnitTest {
         val resources: Resources = InstrumentationRegistry.getInstrumentation().context.resources
         val imageUri = Uri.Builder()
             .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
-            .authority(resources.getResourcePackageName(R.drawable.myexample2))
-            .appendPath(resources.getResourceTypeName(R.drawable.myexample2))
-            .appendPath(resources.getResourceEntryName(R.drawable.myexample2))
+            .authority(resources.getResourcePackageName(R.drawable.myexample))
+            .appendPath(resources.getResourceTypeName(R.drawable.myexample))
+            .appendPath(resources.getResourceEntryName(R.drawable.myexample))
             .build()
         val resultIntent = Intent()
-        val uri = getUriToDrawable(activity,R.drawable.myexample2)
+        val uri = getUriToDrawable(activity,R.drawable.myexample)
         resultIntent.setData(uri)
         return resultIntent
     }
