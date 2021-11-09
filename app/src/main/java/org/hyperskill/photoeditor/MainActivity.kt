@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
 import android.media.MediaScannerConnection
 import android.net.Uri
@@ -13,6 +14,7 @@ import android.provider.MediaStore
 import android.util.Log
 import android.view.View
 import android.webkit.MimeTypeMap
+import android.widget.Button
 import android.widget.ImageView
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
@@ -30,11 +32,17 @@ class MainActivity : AppCompatActivity() {
     public lateinit var resultLauncher: ActivityResultLauncher<Intent>
     private lateinit var brightnessSlider: Slider
     private lateinit var defaultImageBitMap: Bitmap
+    private lateinit var buttonSave: Button
+    lateinit var buttonExecutor: ButtonExecutor
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         bindViews()
+
+        val btnHandler = ButtonHandler(selectedImage, contentResolver)
+        buttonExecutor = ButtonExecutor(btnHandler, buttonSave)
 
         brightnessSlider.addOnChangeListener { slider, value, fromUser ->
             setBrightnessValue()
@@ -45,29 +53,21 @@ class MainActivity : AppCompatActivity() {
                 setPhoto(result)
             }
         }
+
+        defaultImageBitMap = createBitmap()
+        selectedImage!!.setImageBitmap(defaultImageBitMap)
     }
 
     private fun setPhoto(result: ActivityResult) {
         val data: Intent? = result.data
         val contentUri = data!!.data
-        //val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
-        //val imageFileName = "JPEG_" + timeStamp + "." + getFileExt(contentUri)
-        //Log.d("tag", "onActivityResult: Gallery Image Uri:  $imageFileName")
         selectedImage!!.setImageURI(contentUri)
         defaultImageBitMap = (selectedImage.getDrawable() as BitmapDrawable).bitmap
     }
 
-    private fun getFileExt(contentUri: Uri?): String? {
-        val c = contentResolver
-        val mime = MimeTypeMap.getSingleton()
-        return mime.getExtensionFromMimeType(c.getType(contentUri!!))
-    }
-
     private fun setBrightnessValue() {
         if(!this::defaultImageBitMap.isInitialized) return
-
         brightnessValue = brightnessSlider.value.toDouble()
-
         val bitmap = defaultImageBitMap
         val filteredBitmap = applyBrightnessFilter(bitmap)
         loadImage(filteredBitmap)
@@ -83,6 +83,7 @@ class MainActivity : AppCompatActivity() {
     private fun bindViews() {
         selectedImage = findViewById(R.id.ivPhoto)
         brightnessSlider = findViewById(R.id.slBrightness)
+        buttonSave = findViewById(R.id.btnSave)
     }
 
     fun openGallery(view: View) {
@@ -93,32 +94,37 @@ class MainActivity : AppCompatActivity() {
         resultLauncher.launch(i)
     }
 
-    fun savePhoto(view: View) {
-        val bitmap = selectedImage.getDrawable().toBitmap()
-
-        var outStream: FileOutputStream? = null
-        val path = this.getExternalFilesDir(null)?.path?.split("/Android")?.get(0);
-        val filePath = path + "/Pictures"
-        Log.d("tag", "onActivityResult: filePath:  $filePath")
-        val dir = File(filePath)
-        dir.mkdirs()
-        val fileName = String.format("%d.jpg", System.currentTimeMillis())
-        val outFile = File(dir, fileName)
-        outStream = FileOutputStream(outFile)
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outStream)
-        outStream.flush()
-        outStream.close()
-
-        scanFile(this, filePath)
-    }
-
-    private fun scanFile(context: Context, filePath:String) {
-        val file = File(filePath)
-        MediaScannerConnection.scanFile(context, arrayOf(file.toString()),
-            null, null)
-    }
-
     companion object {
         var brightnessValue = 0.0
+    }
+
+    fun createBitmap(): Bitmap {
+        val width = 100
+        val height = 100
+        val pixels = IntArray(width * height)
+        // get pixel array from source
+
+        var R: Int
+        var G: Int
+        var B: Int
+        var index: Int
+
+        for (y in 0 until height) {
+            for (x in 0 until width) {
+                // get current index in 2D-matrix
+                index = y * width + x
+                // get color
+                R = x % 100
+                G = y % 100
+                B = (x+y) % 100
+
+                pixels[index] = Color.rgb(R,G,B)
+
+            }
+        }
+        // output bitmap
+        val bitmapOut = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565)
+        bitmapOut.setPixels(pixels, 0, width, 0, 0, width, height)
+        return bitmapOut
     }
 }
