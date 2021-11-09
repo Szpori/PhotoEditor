@@ -3,9 +3,13 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+<<<<<<< Updated upstream
         <entry key="..\:/androidProjects/PhotoEditor/app/src/main/res/drawable/ic_launcher_background.xml" value="0.1" />
         <entry key="..\:/androidProjects/PhotoEditor/app/src/main/res/layout/activity_main.xml" value="0.1" />
         <entry key="..\:/androidProjects/PhotoEditor/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.1" />
+=======
+        <entry key="..\:/androidProjects/PhotoEditor/app/src/main/res/layout/activity_main.xml" value="0.11141304347826086" />
+>>>>>>> Stashed changes
       </map>
     </option>
   </component>

@@ -11,7 +11,10 @@ import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.widget.Button
 import android.widget.ImageView
+<<<<<<< Updated upstream
 import androidx.test.core.app.ApplicationProvider
+=======
+>>>>>>> Stashed changes
 import com.google.android.material.slider.Slider
 import org.junit.Assert.*
 import org.junit.Test
@@ -23,6 +26,10 @@ import org.robolectric.shadows.ShadowActivity
 import java.io.File
 import java.net.URL
 import android.graphics.BitmapFactory
+<<<<<<< Updated upstream
+=======
+import androidx.test.platform.app.InstrumentationRegistry
+>>>>>>> Stashed changes
 import org.hamcrest.CoreMatchers.notNullValue
 
 
@@ -53,6 +60,7 @@ class Stage2UnitTest {
     }
 
     @Test
+<<<<<<< Updated upstream
     fun testShouldCheckSliderWorkingWithoutImage() {
         val activity = activityController.setup().get()
         val slBrightness = activity.findViewById<Slider>(R.id.slBrightness)
@@ -159,6 +167,102 @@ class Stage2UnitTest {
         }
 
         return true
+=======
+    fun testShouldCheckSliderNotCrashingByDefault() {
+        val activity = activityController.setup().get()
+        val slBrightness = activity.findViewById<Slider>(R.id.slBrightness)
+        val ivPhoto = activity.findViewById<ImageView>(R.id.ivPhoto)
+        slBrightness.value += slBrightness.stepSize
+        val bitmap = (ivPhoto.getDrawable() as BitmapDrawable).bitmap
+        val message2 = "is \"ivPhoto\" not empty and no crash occurs while swiping slider?"
+        assertNotNull(message2, bitmap)
+        slBrightness.value -= slBrightness.stepSize
+    }
+
+    @Test
+    fun testShouldCheckImageIsSetToDefaultBitmap() {
+        val activity = activityController.setup().get()
+        val ivPhoto = activity.findViewById<ImageView>(R.id.ivPhoto)
+        val message = "is defaultBitmap set correctly?"
+        val bitmap = (ivPhoto.getDrawable() as BitmapDrawable).bitmap
+        assertEquals(message, singleColor(bitmap), singleColor(createBitmap()))
+    }
+
+    @Test
+    fun testShouldCheckDefaultBitmapEdit() {
+        val activity = activityController.setup().get()
+        val slBrightness = activity.findViewById<Slider>(R.id.slBrightness)
+        val ivPhoto = activity.findViewById<ImageView>(R.id.ivPhoto)
+        val bitmap = createBitmap()
+        var img0 = (ivPhoto.getDrawable() as BitmapDrawable).bitmap
+        var RGB0 = img0?.let { singleColor(it) }
+        slBrightness.value += slBrightness.stepSize*2
+        slBrightness.value += slBrightness.stepSize
+        val img2 = (ivPhoto.getDrawable() as BitmapDrawable).bitmap
+        val RGB2 = singleColor(img2)
+        val message2 = "val0 ${RGB0} val2 ${RGB2}"
+        if (RGB0 != null) {
+            assertEquals(message2,singleColor(bitmap).first+30, RGB2.first)
+            assertEquals(message2,singleColor(bitmap).second+30, RGB2.second)
+            assertEquals(message2,singleColor(bitmap).third+30, RGB2.third)
+        }
+
+        slBrightness.value -= slBrightness.stepSize*3
+    }
+
+
+    @Test
+    fun testShouldCheckNewBitmapEdit() {
+        val activity = activityController.setup().get()
+        val slBrightness = activity.findViewById<Slider>(R.id.slBrightness)
+        val ivPhoto = activity.findViewById<ImageView>(R.id.ivPhoto)
+        val btnGallery = activity.findViewById<Button>(R.id.btnGallery)
+        btnGallery.performClick()
+        val shadowActivity: ShadowActivity = Shadows.shadowOf(activity)
+        // Determine if two intents are the same for the purposes of intent resolution (filtering).
+        // That is, if their action, data, type, class, and categories are the same. This does
+        // not compare any extra data included in the intents
+        val activityResult = createGalleryPickActivityResultStub2(activity)
+        val intent = shadowActivity!!.peekNextStartedActivityForResult().intent
+        Shadows.shadowOf(activity).receiveResult(
+            intent,
+            Activity.RESULT_OK,
+            activityResult)
+
+        var img0 = (ivPhoto.getDrawable() as BitmapDrawable).bitmap
+        var RGB0 = img0?.let { singleColor(it) }
+
+        for (i in 1..3) {
+            slBrightness.value += slBrightness.stepSize
+            val img2 = (ivPhoto.getDrawable() as BitmapDrawable).bitmap
+            val RGB2 = singleColor(img2)
+            val message2 = "val0 ${RGB0} val2 ${RGB2}"
+            if (RGB0 != null) {
+                assertEquals(message2,changeBrightness(RGB0.first,slBrightness.stepSize*i.toDouble()), RGB2.first)
+                assertEquals(message2,changeBrightness(RGB0.second,slBrightness.stepSize*i.toDouble()), RGB2.second)
+                assertEquals(message2,changeBrightness(RGB0.third,slBrightness.stepSize*i.toDouble()), RGB2.third)
+            }
+        }
+
+        img0 = (ivPhoto.getDrawable() as BitmapDrawable).bitmap
+        RGB0 = img0?.let { singleColor(it) }
+
+
+        for (i in 1..3) {
+            slBrightness.value -= slBrightness.stepSize
+            val img2 = (ivPhoto.getDrawable() as BitmapDrawable).bitmap
+            val RGB2 = singleColor(img2)
+            val message2 = "val0 ${RGB0} val2 ${RGB2}"
+            if (RGB0 != null) {
+                assertEquals(message2,changeBrightness(RGB0.first,-slBrightness.stepSize*i.toDouble()), RGB2.first)
+                assertEquals(message2,changeBrightness(RGB0.second,-slBrightness.stepSize*i.toDouble()), RGB2.second)
+                assertEquals(message2,changeBrightness(RGB0.third,-slBrightness.stepSize*i.toDouble()), RGB2.third)
+            }
+        }
+
+
+
+>>>>>>> Stashed changes
     }
 
     fun singleColor(source: Bitmap): Triple<Int, Int, Int> {
@@ -173,7 +277,11 @@ class Stage2UnitTest {
         var G: Int
         var B: Int
         var y = 80
+<<<<<<< Updated upstream
         var x = 80
+=======
+        var x = 90
+>>>>>>> Stashed changes
 
         index = y * width + x
         // get color
@@ -184,6 +292,7 @@ class Stage2UnitTest {
         return  Triple(R,G,B)
     }
 
+<<<<<<< Updated upstream
 
     private fun getBitmapFromPath(obj: Any, fileName: String): Bitmap? {
         val classLoader = obj.javaClass.classLoader
@@ -201,4 +310,65 @@ class Stage2UnitTest {
 
     }
 
+=======
+    fun createBitmap(): Bitmap {
+        val width = 100
+        val height = 100
+        val pixels = IntArray(width * height)
+        // get pixel array from source
+
+        var R: Int
+        var G: Int
+        var B: Int
+        var index: Int
+
+        for (y in 0 until height) {
+            for (x in 0 until width) {
+                // get current index in 2D-matrix
+                index = y * width + x
+                // get color
+                R = x % 100
+                G = y % 100
+                B = (x+y) % 100
+
+                pixels[index] = Color.rgb(R,G,B)
+
+            }
+        }
+        // output bitmap
+        val bitmapOut = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565)
+        bitmapOut.setPixels(pixels, 0, width, 0, 0, width, height)
+        return bitmapOut
+    }
+
+    fun changeBrightness(colorValue:Int, filterValue:Double):Int {
+        return Math.max(Math.min(colorValue + filterValue, 255.0),0.0).toInt()
+    }
+
+    private fun createGalleryPickActivityResultStub2(activity: MainActivity): Intent {
+        val resources: Resources = InstrumentationRegistry.getInstrumentation().context.resources
+        val imageUri = Uri.Builder()
+            .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
+            .authority(resources.getResourcePackageName(R.drawable.myexample))
+            .appendPath(resources.getResourceTypeName(R.drawable.myexample))
+            .appendPath(resources.getResourceEntryName(R.drawable.myexample))
+            .build()
+        val resultIntent = Intent()
+        val uri = getUriToDrawable(activity,R.drawable.myexample)
+        resultIntent.setData(uri)
+        return resultIntent
+    }
+
+    fun getUriToDrawable(
+         context: Context,
+         drawableId: Int
+    ): Uri {
+        return Uri.parse(
+            ContentResolver.SCHEME_ANDROID_RESOURCE +
+                    "://" + context.getResources().getResourcePackageName(drawableId)
+                    + '/' + context.getResources().getResourceTypeName(drawableId)
+                    + '/' + context.getResources().getResourceEntryName(drawableId)
+        )
+    }
+>>>>>>> Stashed changes
 }

@@ -17,6 +17,18 @@
         app:layout_constraintVertical_bias="0.23000002"/>
 
     <Button
+        android:onClick="openTest"
+        android:id="@+id/btnTest"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:text="Test"
+        app:layout_constraintTop_toBottomOf="@id/ivPhoto"
+        app:layout_constraintEnd_toStartOf="@+id/btnGallery"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
         android:onClick="openGallery"
         android:id="@+id/btnGallery"
         android:layout_width="wrap_content"

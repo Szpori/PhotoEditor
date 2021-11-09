@@ -24,10 +24,15 @@ import org.robolectric.Shadows.shadowOf
 import java.lang.Exception
 
 
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
 @RunWith(RobolectricTestRunner::class)
 class Stage1UnitTest {
 
     private val activityController = Robolectric.buildActivity(MainActivity::class.java)
+<<<<<<< Updated upstream
 
     @Before
     fun setup() {
@@ -35,6 +40,26 @@ class Stage1UnitTest {
         // onCreate(...) => onStart() => onPostCreate(...) => onResume()
     }
 
+=======
+    private lateinit var res: Resources
+    private var activity: MainActivity? = null
+    private var shadowActivity: ShadowActivity? = null
+
+
+    @Before
+    @Throws(Exception::class)
+    fun setUp() {
+        // val res: Resources = ApplicationProvider.getApplicationContext<Application>().resources
+    }
+
+    @Before
+    fun setup() {
+        activity = MainActivity()
+        shadowActivity = Shadows.shadowOf(activity)
+    }
+
+
+>>>>>>> Stashed changes
     @Test
     fun testShouldCheckImageViewExist() {
         val activity = activityController.setup().get()
@@ -49,9 +74,15 @@ class Stage1UnitTest {
         val activity = activityController.setup().get()
         val ivPhoto = activity.findViewById<ImageView>(R.id.ivPhoto)
         val drawable = (ivPhoto.drawable)
+<<<<<<< Updated upstream
         val message2 = "is \"ivPhoto\" empty?"
 
         assertNull(message2, drawable)
+=======
+        val message2 = "is \"ivPhoto\" not empty?"
+
+        assertNotNull(message2, drawable)
+>>>>>>> Stashed changes
     }
 
     @Test
@@ -93,6 +124,7 @@ class Stage1UnitTest {
         val ivPhoto = activity.findViewById<ImageView>(R.id.ivPhoto)
         btnGallery.performClick()
 
+<<<<<<< Updated upstream
         // An Android "Activity" doesn't expose a way to find out about activities it launches
         // Robolectric's "ShadowActivity" keeps track of all launched activities and exposes this information
         // through the "getNextStartedActivity" method.
@@ -102,6 +134,10 @@ class Stage1UnitTest {
         // That is, if their action, data, type, class, and categories are the same. This does
         // not compare any extra data included in the intents
 
+=======
+        val shadowActivity: ShadowActivity = Shadows.shadowOf(activity)
+
+>>>>>>> Stashed changes
         val activityResult = createGalleryPickActivityResultStub2()
 
         val intent = shadowActivity!!.peekNextStartedActivityForResult().intent
@@ -132,5 +168,8 @@ class Stage1UnitTest {
         resultIntent.setData(imageUri)
         return resultIntent
     }
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
 }
