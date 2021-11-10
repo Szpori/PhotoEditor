@@ -13,21 +13,14 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
-import java.io.InputStream
 import android.widget.Button
 import io.mockk.mockk
 import io.mockk.spyk
 import org.junit.Assert.*
 import org.robolectric.Shadows.shadowOf
-import java.io.BufferedInputStream
-import java.io.IOException
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
 import java.io.OutputStream
-import org.robolectric.shadows.ShadowBitmap
-import java.lang.Exception
-import android.provider.MediaStore
-
-import org.robolectric.shadows.ShadowBitmapFactory
-
 
 
 @RunWith(RobolectricTestRunner::class)
@@ -100,23 +93,17 @@ class Stage3UnitTest {
 
     @Test
     fun testShouldCheckSomeNewBitmapIsCreated() {
-        val ivPhoto = activity.findViewById<ImageView>(R.id.ivPhoto)
-        val btnHandler = ButtonHandler(ivPhoto, activity.contentResolver)
+        val cr = activity.contentResolver
+        val output = ByteArrayOutputStream()
+        val crs = shadowOf(cr)
+        val expectedUri = Uri.parse("content://media/external/images/media/1")
+        crs.registerOutputStream(expectedUri, output)
+        val btnHandler = ButtonHandler(activity.findViewById(R.id.ivPhoto), cr)
         val uri = btnHandler.saveImage()
-        val bitmap = decodeStream_shouldSetDescriptionAndCreatedFrom(uri!!)!!
-        val shadowBitmap = shadowOf(bitmap)
-        assertEquals("content://media/external/images/media/1", uri.toString())
-        assertEquals(200, shadowBitmap.createdFromWidth)
-        // obviously this shadow bitmap approach don't work
-    }
-
-    fun decodeStream_shouldSetDescriptionAndCreatedFrom(uri:Uri): Bitmap? {
-        val inputStream: InputStream? =
-            activity.contentResolver.openInputStream(uri)
-        val bitmap = BitmapFactory.decodeStream(inputStream)
-        val shadowBitmap = shadowOf(bitmap)
-        shadowBitmap.createdFromStream
-        return bitmap
+        crs.registerInputStream(expectedUri, ByteArrayInputStream(output.toByteArray()))
+        val bitmap = cr.openInputStream(uri!!).use(BitmapFactory::decodeStream)!!
+        assertEquals(expectedUri, uri)
+        assertEquals(200, bitmap.width)
     }
 
 }
