@@ -3,7 +3,6 @@ package org.hyperskill.photoeditor
 
 import android.content.ContentResolver
 import android.content.Context
-import android.content.res.Resources
 import io.mockk.verify
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -16,10 +15,9 @@ import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import java.io.InputStream
 import android.widget.Button
-import io.mockk.every
 import io.mockk.mockk
-import junit.framework.Assert.*
-import org.robolectric.Shadows
+import io.mockk.spyk
+import org.junit.Assert.*
 import org.robolectric.Shadows.shadowOf
 import java.io.BufferedInputStream
 import java.io.IOException
@@ -79,14 +77,14 @@ class Stage3UnitTest {
     @Test
     fun testShouldCheckSaveFunIsCalled() {
         val btnSave = activity.findViewById<Button>(R.id.btnSave)
-        val btnHandler = mockk<ButtonHandler>()
-        every { btnHandler.saveImage() } returns Uri.parse(R.drawable.myexample.toString())
-        every { btnHandler.saveBitmap(any(), any(), any())} returns Unit
+        val iv = ImageView(activity).also { it.setImageResource(R.drawable.myexample) }
+        val btnHandler = spyk(ButtonHandler(iv, activity.contentResolver))
         val buttonExecutor = ButtonExecutor(btnHandler, btnSave)
         buttonExecutor.saveButton.performClick()
-        verify { btnHandler.saveImage() }
-        verify { btnHandler.saveBitmap(any(), any(), any()) }
-        // last line makes test fail
+        verify {
+            btnHandler.saveImage()
+            btnHandler.saveBitmap(any(), any(), any())
+        }
     }
 
     @Test
