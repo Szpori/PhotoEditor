@@ -99,7 +99,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun createBitmap(): Bitmap {
-        val width = 100
+        val width = 200
         val height = 100
         val pixels = IntArray(width * height)
         // get pixel array from source

@@ -19,9 +19,18 @@ import android.widget.Button
 import io.mockk.every
 import io.mockk.mockk
 import junit.framework.Assert.*
+import org.robolectric.Shadows
+import org.robolectric.Shadows.shadowOf
 import java.io.BufferedInputStream
 import java.io.IOException
 import java.io.OutputStream
+import org.robolectric.shadows.ShadowBitmap
+import java.lang.Exception
+import android.provider.MediaStore
+
+import org.robolectric.shadows.ShadowBitmapFactory
+
+
 
 @RunWith(RobolectricTestRunner::class)
 class Stage3UnitTest {
@@ -33,10 +42,15 @@ class Stage3UnitTest {
     fun decodeResource_shouldGetCorrectColorFromPngImage2() {
         val resources: Resources = activity.getResources()
         val opts = BitmapFactory.Options()
-        val uri = getUriToDrawable(activity, R.drawable.pure_blue)
+        val uri = getUriToDrawable(activity, R.drawable.myexample)
         val bitmap = decodeStream_shouldSetDescriptionAndCreatedFrom(uri!!)!!
+        val shadowBitmap = shadowOf(bitmap)
+        assertEquals("Bitmap for ${uri.toString()}", shadowBitmap.description)
         //val bitmap = BitmapFactory.decodeResource(resources, R.drawable.pure_blue, opts)
         println(singleColor(bitmap))
+        println(bitmap.height)
+        println(shadowBitmap.createdFromHeight)
+        println(shadowBitmap.createdFromResId)
         println(bitmap.getPixel(0, 0))
         assertEquals(Color.BLUE,bitmap.getPixel(0, 0))
         assertEquals(Color.RED,bitmap.getPixel(0, 0))
@@ -94,16 +108,14 @@ class Stage3UnitTest {
 
     @Test
     fun testShouldCheckBitmapProperlySaved() {
-        //val outputStream = Mockito.mock(OutputStream::class.java)
-        //val bitmap = Mockito.mock(Bitmap::class.java)
         val outputStream = mockk<OutputStream>()
         val bitmap = mockk<Bitmap>(relaxed = true)
         val ivPhoto = activity.findViewById<ImageView>(R.id.ivPhoto)
         val btnHandler = ButtonHandler(ivPhoto, activity.contentResolver)
         btnHandler.saveBitmap(bitmap, outputStream, 100)
-        //verify(bitmap).compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
         verify { (bitmap).compress(Bitmap.CompressFormat.JPEG, 100, outputStream) }
     }
+
 
 
     @Test
@@ -111,20 +123,16 @@ class Stage3UnitTest {
         val ivPhoto = activity.findViewById<ImageView>(R.id.ivPhoto)
         val btnHandler = ButtonHandler(ivPhoto, activity.contentResolver)
         val uri = btnHandler.saveImage()
-        val bitmap1 = decodeStream_shouldSetDescriptionAndCreatedFrom(uri!!)
-        println(bitmap1!!.width)
-        println(bitmap1!!.height)
-        println(singleColor(bitmap1!!))
-        assertNotNull(bitmap1)
-        assertNull(bitmap1)
+        assertEquals("content://media/external/images/media/1", uri.toString())
     }
-
 
 
     fun decodeStream_shouldSetDescriptionAndCreatedFrom(uri:Uri): Bitmap? {
         val inputStream: InputStream? =
             activity.contentResolver.openInputStream(uri)
         val bitmap = BitmapFactory.decodeStream(inputStream)
+        val shadowBitmap = shadowOf(bitmap)
+        shadowBitmap.createdFromStream
         return bitmap
     }
 
