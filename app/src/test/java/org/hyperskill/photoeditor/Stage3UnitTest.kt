@@ -38,23 +38,6 @@ class Stage3UnitTest {
     private val activityController = Robolectric.buildActivity(MainActivity::class.java)
     val activity = activityController.setup().get()
 
-    @Test
-    fun decodeResource_shouldGetCorrectColorFromPngImage2() {
-        val resources: Resources = activity.getResources()
-        val opts = BitmapFactory.Options()
-        val uri = getUriToDrawable(activity, R.drawable.myexample)
-        val bitmap = decodeStream_shouldSetDescriptionAndCreatedFrom(uri!!)!!
-        val shadowBitmap = shadowOf(bitmap)
-        assertEquals("Bitmap for ${uri.toString()}", shadowBitmap.description)
-        //val bitmap = BitmapFactory.decodeResource(resources, R.drawable.pure_blue, opts)
-        println(singleColor(bitmap))
-        println(bitmap.height)
-        println(shadowBitmap.createdFromHeight)
-        println(shadowBitmap.createdFromResId)
-        println(bitmap.getPixel(0, 0))
-        assertEquals(Color.BLUE,bitmap.getPixel(0, 0))
-        assertEquals(Color.RED,bitmap.getPixel(0, 0))
-    }
 
     fun getUriToDrawable(
         context: Context,
@@ -102,9 +85,9 @@ class Stage3UnitTest {
         val buttonExecutor = ButtonExecutor(btnHandler, btnSave)
         buttonExecutor.saveButton.performClick()
         verify { btnHandler.saveImage() }
-        //verify { btnHandler.saveBitmap(any(), any(), any()) }
+        verify { btnHandler.saveBitmap(any(), any(), any()) }
+        // last line makes test fail
     }
-
 
     @Test
     fun testShouldCheckBitmapProperlySaved() {
@@ -114,9 +97,8 @@ class Stage3UnitTest {
         val btnHandler = ButtonHandler(ivPhoto, activity.contentResolver)
         btnHandler.saveBitmap(bitmap, outputStream, 100)
         verify { (bitmap).compress(Bitmap.CompressFormat.JPEG, 100, outputStream) }
+        // good test imo
     }
-
-
 
     @Test
     fun testShouldCheckSomeNewBitmapIsCreated() {
@@ -124,8 +106,9 @@ class Stage3UnitTest {
         val btnHandler = ButtonHandler(ivPhoto, activity.contentResolver)
         val uri = btnHandler.saveImage()
         assertEquals("content://media/external/images/media/1", uri.toString())
+        //not ideal, would be nice to get actual bitmap from uri
+        //currently test name is misleading
     }
-
 
     fun decodeStream_shouldSetDescriptionAndCreatedFrom(uri:Uri): Bitmap? {
         val inputStream: InputStream? =
@@ -134,29 +117,6 @@ class Stage3UnitTest {
         val shadowBitmap = shadowOf(bitmap)
         shadowBitmap.createdFromStream
         return bitmap
-    }
-
-    @Test
-    fun decodeResourceStream_shouldGetCorrectColorFromPngImage() {
-        assertEquals(Color.BLUE, getPngImageColorFromResourceStream("res/drawable/pure_blue.png"))
-    }
-
-    private fun getPngImageColorFromResourceStream(pngImagePath: String): Int {
-        val bitmap: Bitmap = getBitmapFromResourceStream(pngImagePath)!!
-        return bitmap.getPixel(0, 0) ?: Int.MIN_VALUE
-    }
-
-    private fun getBitmapFromResourceStream(imagePath: String): Bitmap? {
-        try {
-            BufferedInputStream(javaClass.classLoader!!.getResourceAsStream(imagePath)).use { inputStream ->
-                inputStream.mark(inputStream.available())
-                val opts = BitmapFactory.Options()
-                val resources: Resources = activity.getResources()
-                return BitmapFactory.decodeResourceStream(resources, null, inputStream, null, opts)
-            }
-        } catch (e: IOException) {
-            return null
-        }
     }
 
 }
