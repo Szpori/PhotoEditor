@@ -54,8 +54,10 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        defaultImageBitMap = createBitmap()
-        selectedImage!!.setImageBitmap(defaultImageBitMap)
+        //do not change this line
+        selectedImage!!.setImageBitmap(createBitmap())
+
+        defaultImageBitMap = (selectedImage.getDrawable() as BitmapDrawable).bitmap
     }
 
     private fun setPhoto(result: ActivityResult) {
@@ -98,6 +100,7 @@ class MainActivity : AppCompatActivity() {
         var brightnessValue = 0.0
     }
 
+    // do not change this function
     fun createBitmap(): Bitmap {
         val width = 200
         val height = 100

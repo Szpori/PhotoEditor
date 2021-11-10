@@ -105,9 +105,11 @@ class Stage3UnitTest {
         val ivPhoto = activity.findViewById<ImageView>(R.id.ivPhoto)
         val btnHandler = ButtonHandler(ivPhoto, activity.contentResolver)
         val uri = btnHandler.saveImage()
+        val bitmap = decodeStream_shouldSetDescriptionAndCreatedFrom(uri!!)!!
+        val shadowBitmap = shadowOf(bitmap)
         assertEquals("content://media/external/images/media/1", uri.toString())
-        //not ideal, would be nice to get actual bitmap from uri
-        //currently test name is misleading
+        assertEquals(200, shadowBitmap.createdFromWidth)
+        // obviously this shadow bitmap approach don't work
     }
 
     fun decodeStream_shouldSetDescriptionAndCreatedFrom(uri:Uri): Bitmap? {
