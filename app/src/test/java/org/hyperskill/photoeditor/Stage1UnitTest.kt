@@ -32,26 +32,10 @@ class Stage1UnitTest {
 
     private val activityController = Robolectric.buildActivity(MainActivity::class.java)
     private lateinit var res: Resources
-    private var activity: MainActivity? = null
-    private var shadowActivity: ShadowActivity? = null
-
-
-    @Before
-    @Throws(Exception::class)
-    fun setUp() {
-        // val res: Resources = ApplicationProvider.getApplicationContext<Application>().resources
-    }
-
-    @Before
-    fun setup() {
-        activity = MainActivity()
-        shadowActivity = Shadows.shadowOf(activity)
-    }
-
+    val activity = activityController.setup().get()
 
     @Test
     fun testShouldCheckImageViewExist() {
-        val activity = activityController.setup().get()
         val ivPhoto = activity.findViewById<ImageView>(R.id.ivPhoto)
         val message = "does view with id \"ivPhoto\" placed in activity?"
 
@@ -59,8 +43,7 @@ class Stage1UnitTest {
     }
 
     @Test
-    fun testShouldCheckImageViewImageEmpty() {
-        val activity = activityController.setup().get()
+    fun testShouldCheckImageViewImageNotEmpty() {
         val ivPhoto = activity.findViewById<ImageView>(R.id.ivPhoto)
         val drawable = (ivPhoto.drawable)
         val message2 = "is \"ivPhoto\" not empty?"
@@ -70,7 +53,6 @@ class Stage1UnitTest {
 
     @Test
     fun testShouldCheckButtonExist() {
-        val activity = activityController.setup().get()
         val btnGallery = activity.findViewById<Button>(R.id.btnGallery)
 
         val message = "does view with id \"btnGalllery\" placed in activity?"
@@ -79,7 +61,6 @@ class Stage1UnitTest {
 
     @Test
     fun testShouldCheckButtonOpensGallery() {
-        val activity = activityController.setup().get()
         val btnGallery = activity.findViewById<Button>(R.id.btnGallery)
         btnGallery.performClick()
 
@@ -102,7 +83,6 @@ class Stage1UnitTest {
 
     @Test
     fun testShouldCheckButtonLoadsImage() {
-        val activity = activityController.setup().get()
         val btnGallery = activity.findViewById<Button>(R.id.btnGallery)
         val ivPhoto = activity.findViewById<ImageView>(R.id.ivPhoto)
         btnGallery.performClick()

@@ -32,10 +32,10 @@ import org.hamcrest.CoreMatchers.notNullValue
 class Stage2UnitTest {
 
     private val activityController = Robolectric.buildActivity(MainActivity::class.java)
+    val activity = activityController.setup().get()
 
     @Test
     fun testShouldCheckSliderExist() {
-        val activity = activityController.setup().get()
         val slBrightness = activity.findViewById<Slider>(R.id.slBrightness)
 
         val message = "does view with id \"slBrightness\" placed in activity?"
@@ -56,7 +56,6 @@ class Stage2UnitTest {
 
     @Test
     fun testShouldCheckSliderNotCrashingByDefault() {
-        val activity = activityController.setup().get()
         val slBrightness = activity.findViewById<Slider>(R.id.slBrightness)
         val ivPhoto = activity.findViewById<ImageView>(R.id.ivPhoto)
         slBrightness.value += slBrightness.stepSize
@@ -68,16 +67,16 @@ class Stage2UnitTest {
 
     @Test
     fun testShouldCheckImageIsSetToDefaultBitmap() {
-        val activity = activityController.setup().get()
         val ivPhoto = activity.findViewById<ImageView>(R.id.ivPhoto)
         val message = "is defaultBitmap set correctly?"
         val bitmap = (ivPhoto.getDrawable() as BitmapDrawable).bitmap
-        assertEquals(message, singleColor(bitmap), singleColor(createBitmap()))
+        val bitmap2 = createBitmap()
+        assertEquals(message, singleColor(bitmap), singleColor(bitmap2))
+        assertEquals(message, bitmap.width, bitmap2.width)
     }
 
     @Test
     fun testShouldCheckDefaultBitmapEdit() {
-        val activity = activityController.setup().get()
         val slBrightness = activity.findViewById<Slider>(R.id.slBrightness)
         val ivPhoto = activity.findViewById<ImageView>(R.id.ivPhoto)
         val bitmap = createBitmap()
@@ -100,7 +99,6 @@ class Stage2UnitTest {
 
     @Test
     fun testShouldCheckNewBitmapEdit() {
-        val activity = activityController.setup().get()
         val slBrightness = activity.findViewById<Slider>(R.id.slBrightness)
         val ivPhoto = activity.findViewById<ImageView>(R.id.ivPhoto)
         val btnGallery = activity.findViewById<Button>(R.id.btnGallery)
@@ -175,7 +173,7 @@ class Stage2UnitTest {
     }
 
     fun createBitmap(): Bitmap {
-        val width = 100
+        val width = 200
         val height = 100
         val pixels = IntArray(width * height)
         // get pixel array from source
