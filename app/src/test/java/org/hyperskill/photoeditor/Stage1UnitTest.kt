@@ -19,12 +19,7 @@ import org.robolectric.Shadows
 import org.robolectric.shadows.ShadowActivity
 import org.hyperskill.photoeditor.R.drawable.myexample
 
-import org.junit.Before
 import org.robolectric.Shadows.shadowOf
-import java.lang.Exception
-
-
-
 
 
 @RunWith(RobolectricTestRunner::class)
@@ -32,26 +27,10 @@ class Stage1UnitTest {
 
     private val activityController = Robolectric.buildActivity(MainActivity::class.java)
     private lateinit var res: Resources
-    private var activity: MainActivity? = null
-    private var shadowActivity: ShadowActivity? = null
-
-
-    @Before
-    @Throws(Exception::class)
-    fun setUp() {
-       // val res: Resources = ApplicationProvider.getApplicationContext<Application>().resources
-    }
-
-    @Before
-    fun setup() {
-        activity = MainActivity()
-        shadowActivity = Shadows.shadowOf(activity)
-    }
-
+    val activity = activityController.setup().get()
 
     @Test
     fun testShouldCheckImageViewExist() {
-        val activity = activityController.setup().get()
         val ivPhoto = activity.findViewById<ImageView>(R.id.ivPhoto)
         val message = "does view with id \"ivPhoto\" placed in activity?"
 
@@ -59,8 +38,7 @@ class Stage1UnitTest {
     }
 
     @Test
-    fun testShouldCheckImageViewImageEmpty() {
-        val activity = activityController.setup().get()
+    fun testShouldCheckImageViewImageNotEmpty() {
         val ivPhoto = activity.findViewById<ImageView>(R.id.ivPhoto)
         val drawable = (ivPhoto.drawable)
         val message2 = "is \"ivPhoto\" not empty?"
@@ -70,7 +48,6 @@ class Stage1UnitTest {
 
     @Test
     fun testShouldCheckButtonExist() {
-        val activity = activityController.setup().get()
         val btnGallery = activity.findViewById<Button>(R.id.btnGallery)
 
         val message = "does view with id \"btnGalllery\" placed in activity?"
@@ -79,7 +56,6 @@ class Stage1UnitTest {
 
     @Test
     fun testShouldCheckButtonOpensGallery() {
-        val activity = activityController.setup().get()
         val btnGallery = activity.findViewById<Button>(R.id.btnGallery)
         btnGallery.performClick()
 
@@ -91,7 +67,7 @@ class Stage1UnitTest {
         // An Android "Activity" doesn't expose a way to find out about activities it launches
         // Robolectric's "ShadowActivity" keeps track of all launched activities and exposes this information
         // through the "getNextStartedActivity" method.
-        val shadowActivity: ShadowActivity = Shadows.shadowOf(activity)
+        val shadowActivity: ShadowActivity = shadowOf(activity)
         val actualIntent = shadowActivity.nextStartedActivity
 
         // Determine if two intents are the same for the purposes of intent resolution (filtering).
@@ -102,12 +78,11 @@ class Stage1UnitTest {
 
     @Test
     fun testShouldCheckButtonLoadsImage() {
-        val activity = activityController.setup().get()
         val btnGallery = activity.findViewById<Button>(R.id.btnGallery)
         val ivPhoto = activity.findViewById<ImageView>(R.id.ivPhoto)
         btnGallery.performClick()
 
-        val shadowActivity: ShadowActivity = Shadows.shadowOf(activity)
+        val shadowActivity: ShadowActivity = shadowOf(activity)
 
         val activityResult = createGalleryPickActivityResultStub2()
 
@@ -116,24 +91,19 @@ class Stage1UnitTest {
         shadowOf(activity).receiveResult(
             intent,
             Activity.RESULT_OK,
-        activityResult)
+            activityResult)
 
-
-       //launcher.dispatchResult(Activity.RESULT_OK, Activity.RESULT_OK, activityResult)
         assertNotNull(ivPhoto.drawable)
-        assertEquals(R.drawable.myexample, Shadows.shadowOf(ivPhoto.getDrawable()).getCreatedFromResId())
-
-        //assertEquals(intent.data, activityResult.data)
-
+        assertEquals(myexample, shadowOf(ivPhoto.getDrawable()).getCreatedFromResId())
     }
 
     private fun createGalleryPickActivityResultStub2(): Intent {
         val resources: Resources = InstrumentationRegistry.getInstrumentation().context.resources
         val imageUri = Uri.Builder()
             .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
-            .authority(resources.getResourcePackageName(R.drawable.myexample))
-            .appendPath(resources.getResourceTypeName(R.drawable.myexample))
-            .appendPath(resources.getResourceEntryName(R.drawable.myexample))
+            .authority(resources.getResourcePackageName(myexample))
+            .appendPath(resources.getResourceTypeName(myexample))
+            .appendPath(resources.getResourceEntryName(myexample))
             .build()
         val resultIntent = Intent()
         resultIntent.setData(imageUri)
