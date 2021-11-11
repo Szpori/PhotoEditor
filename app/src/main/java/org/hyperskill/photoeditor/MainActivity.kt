@@ -1,29 +1,23 @@
 package org.hyperskill.photoeditor
 
 import android.app.Activity
-import android.content.Context
+import android.content.ContentValues
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
-import android.media.MediaScannerConnection
 import android.net.Uri
 import android.os.Bundle
-import android.os.Environment
 import android.provider.MediaStore
-import android.util.Log
 import android.view.View
-import android.webkit.MimeTypeMap
 import android.widget.Button
 import android.widget.ImageView
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.graphics.drawable.toBitmap
 import com.google.android.material.slider.Slider
-import java.io.File
-import java.io.FileOutputStream
+import java.io.OutputStream
 
 
 class MainActivity : AppCompatActivity() {
@@ -33,16 +27,15 @@ class MainActivity : AppCompatActivity() {
     private lateinit var brightnessSlider: Slider
     private lateinit var defaultImageBitMap: Bitmap
     private lateinit var buttonSave: Button
-    lateinit var buttonExecutor: ButtonExecutor
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         bindViews()
-
-        val btnHandler = ButtonHandler(selectedImage, contentResolver)
-        buttonExecutor = ButtonExecutor(btnHandler, buttonSave)
+        buttonSave.setOnClickListener {
+            saveImage()
+        }
 
         brightnessSlider.addOnChangeListener { slider, value, fromUser ->
             setBrightnessValue()
@@ -58,6 +51,19 @@ class MainActivity : AppCompatActivity() {
         selectedImage!!.setImageBitmap(createBitmap())
 
         defaultImageBitMap = (selectedImage.getDrawable() as BitmapDrawable).bitmap
+    }
+
+    fun saveImage() {
+        val bitmap = (selectedImage.getDrawable() as BitmapDrawable).bitmap
+        val contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+        //val uri = Uri.parse("Bad uri")
+        val uri = contentResolver.insert(contentUri, ContentValues())
+        val stream = uri?.let { contentResolver.openOutputStream(it) }
+        saveBitmap(bitmap, stream!!, 100)
+    }
+
+    fun saveBitmap(bitmap: Bitmap, stream: OutputStream, quality:Int) {
+        bitmap.compress(Bitmap.CompressFormat.JPEG, quality, stream)
     }
 
     private fun setPhoto(result: ActivityResult) {
