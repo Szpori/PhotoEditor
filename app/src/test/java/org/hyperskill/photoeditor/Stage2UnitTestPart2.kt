@@ -29,131 +29,53 @@ import org.robolectric.shadows.ShadowActivity
 
 
 @RunWith(RobolectricTestRunner::class)
-class Stage2UnitTest {
+class Stage2UnitTestPart2 {
 
     private val activityController = Robolectric.buildActivity(MainActivity::class.java)
     val activity = activityController.setup().get()
 
-    //@ExperimentalCoroutinesApi
-    //@get:Rule
-    //var mainCoroutineRule = MainCoroutineRule()
-
-
     @Test
-    fun testShouldCheckSliderExist() {
-        val slBrightness = activity.findViewById<Slider>(R.id.slBrightness)
-
-        val message = "does view with id \"slBrightness\" placed in activity?"
-        assertNotNull(message, slBrightness)
-
-        val message2 = "\"slider\" should have proper stepSize attribute"
-        assertEquals(message2, slBrightness.stepSize, 10f)
-
-        val message3 = "\"slider\" should have proper valueFrom attribute"
-        assertEquals(message3, slBrightness.valueFrom, -250f)
-
-        val message4 = "\"slider\" should have proper valueTo attribute"
-        assertEquals(message4, slBrightness.valueTo, 250f)
-
-        val message5 = "\"slider\" should have proper initial value"
-        assertEquals(message5, slBrightness.value, 0f)
-    }
-
-    @Test
-    fun testShouldCheckSliderNotCrashingByDefault() {
+    fun testShouldCheckNewBitmapEdit() {
+        var defaultBitmap = createBitmap()
         val slBrightness = activity.findViewById<Slider>(R.id.slBrightness)
         val ivPhoto = activity.findViewById<ImageView>(R.id.ivPhoto)
-        slBrightness.value += slBrightness.stepSize
-        val bitmap = (ivPhoto.getDrawable() as BitmapDrawable).bitmap
-        val message2 = "is \"ivPhoto\" not empty and no crash occurs while swiping slider?"
-        assertNotNull(message2, bitmap)
-        slBrightness.value -= slBrightness.stepSize
-    }
+        val btnGallery = activity.findViewById<Button>(R.id.btnGallery)
+        btnGallery.performClick()
+        val shadowActivity: ShadowActivity = Shadows.shadowOf(activity)
+        // Determine if two intents are the same for the purposes of intent resolution (filtering).
+        // That is, if their action, data, type, class, and categories are the same. This does
+        // not compare any extra data included in the intents
+        val activityResult = createGalleryPickActivityResultStub2(activity)
+        val intent = shadowActivity!!.peekNextStartedActivityForResult().intent
+        Shadows.shadowOf(activity).receiveResult(
+            intent,
+            Activity.RESULT_OK,
+            activityResult)
 
-    @Test
-    fun testShouldCheckImageIsSetToDefaultBitmap() {
-        val ivPhoto = activity.findViewById<ImageView>(R.id.ivPhoto)
-        val message = "is defaultBitmap set correctly?"
-        val bitmap = (ivPhoto.getDrawable() as BitmapDrawable).bitmap
-        val bitmap2 = createBitmap()
-        assertEquals(message, singleColor(bitmap), singleColor(bitmap2))
-        assertEquals(message, bitmap.width, bitmap2.width)
-    }
-
-
-    @Test
-    fun testShouldCheckSaveFunIsCalled() {
-        val ivPhoto = activity.findViewById<ImageView>(R.id.ivPhoto)
-        val bitmap = (ivPhoto.getDrawable() as BitmapDrawable).bitmap
-        val slBrightness = activity.findViewById<Slider>(R.id.slBrightness)
-        val model = mockk<IBrightnessFilter>(relaxed = true)
-        every {
-            runBlocking {
-                model.setBrightness(any(),any())
-            }
-        } returns Unit
-
-
-        val sliderExecutor = SliderExecutor(model, slBrightness, bitmap)
-        sliderExecutor.slBrightness.value +=  sliderExecutor.slBrightness.stepSize
-        sliderExecutor.slBrightness.value -=  sliderExecutor.slBrightness.stepSize
-
-            verify {
-                runBlocking {
-                    model.setBrightness(any(),any())
-                }
-                shadowOf(getMainLooper()).idle()
-            }
-    }
-
-
-    @Test
-    fun testShouldCheckDefaultBitmapEdit() {
-        val slBrightness = activity.findViewById<Slider>(R.id.slBrightness)
-        val ivPhoto = activity.findViewById<ImageView>(R.id.ivPhoto)
-        val bitmap = createBitmap()
         var img0 = (ivPhoto.getDrawable() as BitmapDrawable).bitmap
         var RGB0 = img0?.let { singleColor(it) }
-        slBrightness.value += slBrightness.stepSize*2
-        slBrightness.value += slBrightness.stepSize
-        shadowOf(getMainLooper()).idle()
-        val img2 = (ivPhoto.getDrawable() as BitmapDrawable).bitmap
-        val RGB2 = singleColor(img2)
-        val message2 = "val0 ${RGB0} val2 ${RGB2}"
-        if (RGB0 != null) {
-            assertNotEquals(message2,singleColor(bitmap).first+30, RGB2.first)
-            assertNotEquals(message2,singleColor(bitmap).second+30, RGB2.second)
-            assertNotEquals(message2,singleColor(bitmap).third+30, RGB2.third)
-        }
-        slBrightness.value -= slBrightness.stepSize*3
-    }
 
-
-    @Test
-    fun testShouldCheckDefaultBitmapEditCoroutine() {
-        val defaultBitmap = createBitmap()
-        var RGB0 = singleColor(defaultBitmap)
-        val slBrightness = activity.findViewById<Slider>(R.id.slBrightness)
-        val ivPhoto = activity.findViewById<ImageView>(R.id.ivPhoto)
-        for (i in 1..2) {
-            val model = runBlocking {
-                slBrightness.value -= slBrightness.stepSize
+        for (i in 1..1) {
+            slBrightness.value += slBrightness.stepSize
+            val model = runBlocking() {
                 val model = mockk<BrightnessFilter>(relaxed = true)
                 //val model = BrightnessFilter(slBrightness, ivPhoto, coroutineContext)
                 model.setBrightness(defaultBitmap, slBrightness.value.toInt())
                 model
             }
             shadowOf(getMainLooper()).idle()
-            val bitmap = (ivPhoto.getDrawable() as BitmapDrawable).bitmap
+
             val img2 = (ivPhoto.getDrawable() as BitmapDrawable).bitmap
             val RGB2 = singleColor(img2)
             val message2 = "val0 ${RGB0} val2 ${RGB2}"
-
-            assertEquals(message2,changeBrightness(RGB0.first,-slBrightness.stepSize*i.toDouble()), RGB2.first)
-            assertEquals(message2,changeBrightness(RGB0.second,-slBrightness.stepSize*i.toDouble()), RGB2.second)
-            assertEquals(message2,changeBrightness(RGB0.third,-slBrightness.stepSize*i.toDouble()), RGB2.third)
+            if (RGB0 != null) {
+                assertEquals(message2,changeBrightness(RGB0.first,slBrightness.stepSize*i.toDouble()), RGB2.first)
+                assertEquals(message2,changeBrightness(RGB0.second,slBrightness.stepSize*i.toDouble()), RGB2.second)
+                assertEquals(message2,changeBrightness(RGB0.third,slBrightness.stepSize*i.toDouble()), RGB2.third)
+            }
         }
     }
+
 
 
     fun singleColor(source: Bitmap): Triple<Int, Int, Int> {

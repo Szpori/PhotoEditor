@@ -2,10 +2,32 @@ package org.hyperskill.photoeditor
 
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.widget.ImageView
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlin.coroutines.CoroutineContext
 
-object BrightnessFilter {
+class BrightnessFilter(
+    override val selectedImage: ImageView,
+    override val parentContext: CoroutineContext
+) :IBrightnessFilter {
 
-    fun apply(source: Bitmap): Bitmap {
+    private val modelScope = CoroutineScope(parentContext)
+
+    override suspend fun setBrightness(defaultImageBitMap:Bitmap, brightnessValue:Int) {
+        val filteredDeferred = modelScope.async(Dispatchers.Default) {
+           apply(defaultImageBitMap, brightnessValue)
+        }
+        val filteredBitmap = filteredDeferred.await()
+        loadImage(filteredBitmap)
+    }
+
+    private fun loadImage(bmp: Bitmap) {
+        selectedImage.setImageBitmap(bmp)
+    }
+
+    fun apply(source: Bitmap, brightnessValue:Int): Bitmap {
         val width = source.width
         val height = source.height
         val pixels = IntArray(width * height)
@@ -27,10 +49,9 @@ object BrightnessFilter {
                 B = Color.blue(pixels[index])
 
                 pixels[index] = Color.rgb(
-                    changeBrightness(R, MainActivity.brightnessValue),
-                    changeBrightness(G, MainActivity.brightnessValue),
-                    changeBrightness(B, MainActivity.brightnessValue))
-
+                    changeBrightness(R, brightnessValue),
+                    changeBrightness(G, brightnessValue),
+                    changeBrightness(B, brightnessValue))
             }
         }
 
@@ -40,7 +61,7 @@ object BrightnessFilter {
         return bitmapOut
     }
 
-    fun changeBrightness(colorValue:Int, filterValue:Double):Int {
-        return Math.max(Math.min(colorValue + filterValue, 255.0),0.0).toInt()
+    fun changeBrightness(colorValue:Int, filterValue:Int):Int {
+        return Math.max(Math.min(colorValue + filterValue, 255),0)
     }
 }

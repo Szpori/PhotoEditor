@@ -2,32 +2,21 @@ package org.hyperskill.photoeditor
 
 import android.app.Activity
 import android.content.ContentValues
-import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
-import android.media.MediaScannerConnection
-import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
-import android.util.Log
 import android.view.View
-import android.webkit.MimeTypeMap
 import android.widget.Button
 import android.widget.ImageView
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.graphics.drawable.toBitmap
 import com.google.android.material.slider.Slider
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
-import java.io.File
-import java.io.FileOutputStream
+import kotlinx.coroutines.*
 import java.io.OutputStream
 
 
@@ -36,21 +25,33 @@ class MainActivity : AppCompatActivity() {
     private lateinit var selectedImage: ImageView
     public lateinit var resultLauncher: ActivityResultLauncher<Intent>
     private lateinit var brightnessSlider: Slider
-    private lateinit var defaultImageBitMap: Bitmap
-    private val coroutineScope = CoroutineScope(Dispatchers.Main)
+    //private lateinit var defaultImageBitMap: Bitmap
     private lateinit var buttonSave: Button
+    private lateinit var sliderExecutor: SliderExecutor
+    //lateinit var brightnessFilter: BrightnessFilter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         bindViews()
+
+        /*
+        GlobalScope.launch(Dispatchers.Main) {
+            brightnessFilter = BrightnessFilter(selectedImage, Dispatchers.Default)
+        }
+
+         */
+
         buttonSave.setOnClickListener {
             saveImage()
         }
 
+        /*
         brightnessSlider.addOnChangeListener { slider, value, fromUser ->
             setBrightnessValue()
         }
+
+         */
 
         resultLauncher = registerForActivityResult(StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
@@ -61,7 +62,11 @@ class MainActivity : AppCompatActivity() {
         //do not change this line
         selectedImage!!.setImageBitmap(createBitmap())
 
-        defaultImageBitMap = (selectedImage.getDrawable() as BitmapDrawable).bitmap
+        val defaultImageBitMap = (selectedImage.getDrawable() as BitmapDrawable).bitmap
+
+
+        val brightnessFilter = BrightnessFilter(selectedImage, Dispatchers.Default)
+        sliderExecutor = SliderExecutor(brightnessFilter, brightnessSlider, defaultImageBitMap)
     }
 
     fun saveImage() {
@@ -81,37 +86,19 @@ class MainActivity : AppCompatActivity() {
         val data: Intent? = result.data
         val contentUri = data!!.data
         selectedImage!!.setImageURI(contentUri)
-        defaultImageBitMap = (selectedImage.getDrawable() as BitmapDrawable).bitmap
-        defaultImageBitMap = resize(defaultImageBitMap, 1224, 1632)
+        val defaultImageBitMap = (selectedImage.getDrawable() as BitmapDrawable).bitmap
+        sliderExecutor.defaultImageBitMap = resize(defaultImageBitMap, 1224, 1632)
     }
 
-    private fun setBrightnessValue() {
-        if(!this::defaultImageBitMap.isInitialized) return
-
-        brightnessValue = brightnessSlider.value.toDouble()
-
-
-        coroutineScope.launch {
-            // defer the call to the Dispatchers IO coroutine scope
-            val bitmap = defaultImageBitMap
-            // to apply the filter requires some processing  which should not be done on the main thread
-            val filteredDeferred = coroutineScope.async(Dispatchers.Default) {
-                // filter needs to be done after we have received the original bitmap
-                applyBrightnessFilter(bitmap)
-            }
-
-            // await the filter to be applied to the original image
-            val filteredBitmap = filteredDeferred.await()
-            // load the filtered image once we have it
-            loadImage(filteredBitmap)
+    /*
+    fun setBrightnessValue() {
+        GlobalScope.launch(Dispatchers.Main) {
+            brightnessFilter.setBrightness(defaultImageBitMap, brightnessSlider.value.toInt())
         }
     }
 
-    private fun applyBrightnessFilter(originalBitmap: Bitmap) = BrightnessFilter.apply(originalBitmap)
+     */
 
-    private fun loadImage(bmp: Bitmap) {
-        selectedImage.setImageBitmap(bmp)
-    }
 
 
     private fun bindViews() {
@@ -147,10 +134,6 @@ class MainActivity : AppCompatActivity() {
         } else {
             image
         }
-    }
-
-    companion object {
-        var brightnessValue = 0.0
     }
 
     // do not change this function
