@@ -6,7 +6,6 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
-import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.view.View
@@ -25,6 +24,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var selectedImage: ImageView
     public lateinit var resultLauncher: ActivityResultLauncher<Intent>
     private lateinit var brightnessSlider: Slider
+    private lateinit var contrastSlider: Slider
     private lateinit var defaultImageBitMap: Bitmap
     private lateinit var buttonSave: Button
 
@@ -38,7 +38,10 @@ class MainActivity : AppCompatActivity() {
         }
 
         brightnessSlider.addOnChangeListener { slider, value, fromUser ->
-            setBrightnessValue()
+            applyFilterChange()
+        }
+        contrastSlider.addOnChangeListener { slider, value, fromUser ->
+            applyFilterChange()
         }
 
         resultLauncher = registerForActivityResult(StartActivityForResult()) { result ->
@@ -49,7 +52,6 @@ class MainActivity : AppCompatActivity() {
 
         //do not change this line
         selectedImage!!.setImageBitmap(createBitmap())
-
         defaultImageBitMap = (selectedImage.getDrawable() as BitmapDrawable).bitmap
     }
 
@@ -73,16 +75,12 @@ class MainActivity : AppCompatActivity() {
         defaultImageBitMap = (selectedImage.getDrawable() as BitmapDrawable).bitmap
     }
 
-    private fun setBrightnessValue() {
+    private fun applyFilterChange() {
         if(!this::defaultImageBitMap.isInitialized) return
-        brightnessValue = brightnessSlider.value.toDouble()
         val bitmap = defaultImageBitMap
-        val filteredBitmap = applyBrightnessFilter(bitmap)
+        val filteredBitmap = ContrastBrightnessFilter.apply(bitmap, brightnessSlider.value.toInt(), contrastSlider.value.toInt())
         loadImage(filteredBitmap)
     }
-
-    private fun applyBrightnessFilter(originalBitmap: Bitmap) = BrightnessFilter.apply(originalBitmap)
-
     private fun loadImage(bmp: Bitmap) {
         selectedImage.setImageBitmap(bmp)
     }
@@ -91,6 +89,7 @@ class MainActivity : AppCompatActivity() {
     private fun bindViews() {
         selectedImage = findViewById(R.id.ivPhoto)
         brightnessSlider = findViewById(R.id.slBrightness)
+        contrastSlider = findViewById(R.id.slContrast)
         buttonSave = findViewById(R.id.btnSave)
     }
 
@@ -100,10 +99,6 @@ class MainActivity : AppCompatActivity() {
             MediaStore.Images.Media.EXTERNAL_CONTENT_URI
         )
         resultLauncher.launch(i)
-    }
-
-    companion object {
-        var brightnessValue = 0.0
     }
 
     // do not change this function
@@ -123,9 +118,9 @@ class MainActivity : AppCompatActivity() {
                 // get current index in 2D-matrix
                 index = y * width + x
                 // get color
-                R = x % 100
-                G = y % 100
-                B = (x+y) % 100
+                R = x % 100 + 40
+                G = y % 100 + 80
+                B = (x+y) % 100 + 120
 
                 pixels[index] = Color.rgb(R,G,B)
 
