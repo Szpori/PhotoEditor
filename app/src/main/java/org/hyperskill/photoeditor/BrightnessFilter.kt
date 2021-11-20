@@ -5,7 +5,7 @@ import android.graphics.Color
 
 object BrightnessFilter {
 
-    fun apply(source: Bitmap): Bitmap {
+    fun apply(source: Bitmap, brightnessValue: Int): Bitmap {
         val width = source.width
         val height = source.height
         val pixels = IntArray(width * height)
@@ -27,9 +27,9 @@ object BrightnessFilter {
                 B = Color.blue(pixels[index])
 
                 pixels[index] = Color.rgb(
-                    changeBrightness(R, MainActivity.brightnessValue),
-                    changeBrightness(G, MainActivity.brightnessValue),
-                    changeBrightness(B, MainActivity.brightnessValue))
+                    changeBrightness(R, brightnessValue),
+                    changeBrightness(G, brightnessValue),
+                    changeBrightness(B, brightnessValue))
 
             }
         }
@@ -40,7 +40,7 @@ object BrightnessFilter {
         return bitmapOut
     }
 
-    fun changeBrightness(colorValue:Int, filterValue:Double):Int {
-        return Math.max(Math.min(colorValue + filterValue, 255.0),0.0).toInt()
+    fun changeBrightness(colorValue:Int, filterValue:Int):Int {
+        return Math.max(Math.min(colorValue + filterValue, 255),0)
     }
 }

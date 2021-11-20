@@ -6,7 +6,6 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
-import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.view.View
@@ -75,14 +74,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun setBrightnessValue() {
         if(!this::defaultImageBitMap.isInitialized) return
-        brightnessValue = brightnessSlider.value.toDouble()
         val bitmap = defaultImageBitMap
-        val filteredBitmap = applyBrightnessFilter(bitmap)
+        val filteredBitmap = BrightnessFilter.apply(bitmap, brightnessSlider.value.toInt())
         loadImage(filteredBitmap)
     }
-
-    private fun applyBrightnessFilter(originalBitmap: Bitmap) = BrightnessFilter.apply(originalBitmap)
-
     private fun loadImage(bmp: Bitmap) {
         selectedImage.setImageBitmap(bmp)
     }
@@ -100,10 +95,6 @@ class MainActivity : AppCompatActivity() {
             MediaStore.Images.Media.EXTERNAL_CONTENT_URI
         )
         resultLauncher.launch(i)
-    }
-
-    companion object {
-        var brightnessValue = 0.0
     }
 
     // do not change this function
