@@ -25,6 +25,8 @@ class MainActivity : AppCompatActivity() {
     public lateinit var resultLauncher: ActivityResultLauncher<Intent>
     private lateinit var brightnessSlider: Slider
     private lateinit var contrastSlider: Slider
+    private lateinit var saturationSlider: Slider
+    private lateinit var gammaSlider: Slider
     private lateinit var defaultImageBitMap: Bitmap
     private lateinit var buttonSave: Button
 
@@ -41,6 +43,12 @@ class MainActivity : AppCompatActivity() {
             applyFilterChange()
         }
         contrastSlider.addOnChangeListener { slider, value, fromUser ->
+            applyFilterChange()
+        }
+        saturationSlider.addOnChangeListener { slider, value, fromUser ->
+            applyFilterChange()
+        }
+        gammaSlider.addOnChangeListener { slider, value, fromUser ->
             applyFilterChange()
         }
 
@@ -78,7 +86,7 @@ class MainActivity : AppCompatActivity() {
     private fun applyFilterChange() {
         if(!this::defaultImageBitMap.isInitialized) return
         val bitmap = defaultImageBitMap
-        val filteredBitmap = ContrastBrightnessFilter.apply(bitmap, brightnessSlider.value.toInt(), contrastSlider.value.toInt())
+        val filteredBitmap = ContrastBrightnessFilter.apply(bitmap, brightnessSlider.value.toInt(), contrastSlider.value.toInt(), saturationSlider.value.toInt(), gammaSlider.value.toInt())
         loadImage(filteredBitmap)
     }
     private fun loadImage(bmp: Bitmap) {
@@ -90,6 +98,8 @@ class MainActivity : AppCompatActivity() {
         selectedImage = findViewById(R.id.ivPhoto)
         brightnessSlider = findViewById(R.id.slBrightness)
         contrastSlider = findViewById(R.id.slContrast)
+        saturationSlider = findViewById(R.id.slSaturation)
+        gammaSlider = findViewById(R.id.slGamma)
         buttonSave = findViewById(R.id.btnSave)
     }
 

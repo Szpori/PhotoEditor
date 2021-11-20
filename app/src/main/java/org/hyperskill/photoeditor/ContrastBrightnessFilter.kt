@@ -5,7 +5,7 @@ import android.graphics.Color
 
 object ContrastBrightnessFilter {
 
-    fun apply(source: Bitmap, brightnessValue:Int, contrast:Int): Bitmap {
+    fun apply(source: Bitmap, brightnessValue:Int, contrast:Int, saturation:Int, gamma:Int): Bitmap {
         val width = source.width
         val height = source.height
         val pixels = IntArray(width * height)
@@ -17,7 +17,8 @@ object ContrastBrightnessFilter {
         var B: Int
         var index: Int
 
-        var alpha = (255+contrast)/(255-contrast)
+        var alpha1 = (255+contrast)/(255-contrast)
+        var alpha2 = (255+saturation)/(255-saturation)
         var u_mean = calculateBrightness(source)
 
         for (y in 0 until height) {
@@ -29,11 +30,25 @@ object ContrastBrightnessFilter {
                 G = Color.green(pixels[index])
                 B = Color.blue(pixels[index])
 
-                pixels[index] = Color.rgb(
-                    checkBounds(alpha*(R - u_mean) + u_mean + brightnessValue),
-                    checkBounds(alpha*(G - u_mean) + u_mean + brightnessValue),
-                    checkBounds(alpha*(B - u_mean) + u_mean + brightnessValue))
 
+
+                val u = (R+G+B)/3
+
+                R = checkBounds((alpha1*(R - u_mean) + u_mean) + brightnessValue)
+                G = checkBounds((alpha1*(G - u_mean) + u_mean) + brightnessValue)
+                B = checkBounds((alpha1*(B - u_mean) + u_mean) + brightnessValue)
+
+                R = checkBounds((alpha2*(R - u) + u))
+                G = checkBounds((alpha2*(G - u) + u))
+                B = checkBounds((alpha2*(B - u) + u))
+
+
+                R = (255 * Math.pow(R/255.0, gamma.toDouble())).toInt()
+                G = (255 * Math.pow(G/255.0, gamma.toDouble())).toInt()
+                B = (255 * Math.pow(B/255.0, gamma.toDouble())).toInt()
+
+
+                pixels[index] = Color.rgb(R,G,B)
             }
         }
 

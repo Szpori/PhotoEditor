@@ -1,6 +1,5 @@
 package org.hyperskill.photoeditor
 
-import android.app.Activity
 import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
@@ -9,7 +8,6 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
-import android.widget.Button
 import android.widget.ImageView
 import com.google.android.material.slider.Slider
 import org.junit.Assert.*
@@ -17,65 +15,91 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.Shadows
-import org.robolectric.shadows.ShadowActivity
 import androidx.test.platform.app.InstrumentationRegistry
 
 
 @RunWith(RobolectricTestRunner::class)
-class Stage4UnitTest {
+class Stage5UnitTest {
 
     private val activityController = Robolectric.buildActivity(MainActivity::class.java)
     val activity = activityController.setup().get()
+    val marginError = 3
 
     @Test
     fun testShouldCheckSliderExist() {
-        val slContrast = activity.findViewById<Slider>(R.id.slContrast)
+        val slSaturation = activity.findViewById<Slider>(R.id.slSaturation)
 
-        val message = "does view with id \"slContrast\" placed in activity?"
-        assertNotNull(message, slContrast)
+        val message = "does view with id \"slSaturation\" placed in activity?"
+        assertNotNull(message, slSaturation)
 
-        val message2 = "\"slider\" should have proper stepSize attribute"
-        assertEquals(message2, slContrast.stepSize, 10f)
+        val message2 = "\"slider saturation\" should have proper stepSize attribute"
+        assertEquals(message2, slSaturation.stepSize, 10f)
 
-        val message3 = "\"slider\" should have proper valueFrom attribute"
-        assertEquals(message3, slContrast.valueFrom, -250f)
+        val message3 = "\"slider saturation\" should have proper valueFrom attribute"
+        assertEquals(message3, slSaturation.valueFrom, -250f)
 
-        val message4 = "\"slider\" should have proper valueTo attribute"
-        assertEquals(message4, slContrast.valueTo, 250f)
+        val message4 = "\"slider saturation\" should have proper valueTo attribute"
+        assertEquals(message4, slSaturation.valueTo, 250f)
 
-        val message5 = "\"slider\" should have proper initial value"
-        assertEquals(message5, slContrast.value, 0f)
+        val message5 = "\"slider saturation\" should have proper initial value"
+        assertEquals(message5, slSaturation.value, 0f)
+    }
+
+    @Test
+    fun testShouldCheckGammaSliderExist() {
+
+        val slGamma = activity.findViewById<Slider>(R.id.slGamma)
+
+        val message = "does view with id \"slGamma\" placed in activity?"
+        assertNotNull(message, slGamma)
+
+        val message2 = "\"slider gamma\" should have proper stepSize attribute"
+        assertEquals(message2, slGamma.stepSize, 0.2f)
+
+        val message3 = "\"slider gamma\" should have proper valueFrom attribute"
+        assertEquals(message3, slGamma.valueFrom, 0.2f)
+
+        val message4 = "\"slider gamma\" should have proper valueTo attribute"
+        assertEquals(message4, slGamma.valueTo, 4f)
+
+        val message5 = "\"slider gamma\" should have proper initial value"
+        assertEquals(message5, slGamma.value, 1f)
     }
 
     @Test
     fun testShouldCheckSliderNotCrashingByDefault() {
-        val slContrast = activity.findViewById<Slider>(R.id.slContrast)
+        val slSaturation = activity.findViewById<Slider>(R.id.slSaturation)
         val ivPhoto = activity.findViewById<ImageView>(R.id.ivPhoto)
-        slContrast.value += slContrast.stepSize
+        slSaturation.value += slSaturation.stepSize
         val bitmap = (ivPhoto.getDrawable() as BitmapDrawable).bitmap
         val message2 = "is \"ivPhoto\" not empty and no crash occurs while swiping slider?"
         assertNotNull(message2, bitmap)
-        slContrast.value -= slContrast.stepSize
+        slSaturation.value -= slSaturation.stepSize
     }
 
     @Test
     fun testShouldCheckDefaultBitmapEdit() {
         val slBrightness = activity.findViewById<Slider>(R.id.slBrightness)
         val slContrast = activity.findViewById<Slider>(R.id.slContrast)
+        val slSaturation = activity.findViewById<Slider>(R.id.slSaturation)
+        val slGamma = activity.findViewById<Slider>(R.id.slGamma)
         val ivPhoto = activity.findViewById<ImageView>(R.id.ivPhoto)
         var img0 = (ivPhoto.getDrawable() as BitmapDrawable).bitmap
         var RGB0 = img0?.let { singleColor(it,80, 90) }
         slBrightness.value += slBrightness.stepSize
-        slContrast.value += slContrast.stepSize*9
+        slContrast.value += slContrast.stepSize*4
         slContrast.value += slContrast.stepSize
+        slSaturation.value += slSaturation.stepSize*10
+        slSaturation.value += slSaturation.stepSize*5
+        slGamma.value += slGamma.stepSize*10
+
         val img2 = (ivPhoto.getDrawable() as BitmapDrawable).bitmap
-        val RGB2 = singleColor(img2, 80, 90)
+        val RGB2 = singleColor(img2, 60, 70)
         val message2 = "val0 ${RGB0} val2 ${RGB2}"
         if (RGB0 != null) {
-            assertEquals(message2,141, RGB2.first)
-            assertEquals(message2,201, RGB2.second)
-            assertEquals(message2,255, RGB2.third)
+            assertTrue(message2,Math.abs(12-RGB2.first) <= marginError)
+            assertTrue(message2,Math.abs(95-RGB2.second) <= marginError)
+            assertTrue(message2,Math.abs(150-RGB2.third) <= marginError)
         }
     }
 
