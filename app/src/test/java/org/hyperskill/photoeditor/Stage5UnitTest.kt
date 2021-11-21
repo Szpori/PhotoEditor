@@ -107,19 +107,24 @@ class Stage5UnitTest {
     fun testShouldCheckDefaultBitmapEdit2() {
         val slBrightness = activity.findViewById<Slider>(R.id.slBrightness)
         val slContrast = activity.findViewById<Slider>(R.id.slContrast)
+        val slSaturation = activity.findViewById<Slider>(R.id.slSaturation)
         val ivPhoto = activity.findViewById<ImageView>(R.id.ivPhoto)
+        val slGamma = activity.findViewById<Slider>(R.id.slGamma)
         var img0 = (ivPhoto.getDrawable() as BitmapDrawable).bitmap
         var RGB0 = img0?.let { singleColor(it, 80, 90) }
+        slGamma.value += slGamma.stepSize*5
+        slSaturation.value += slSaturation.stepSize*5
         slBrightness.value += slBrightness.stepSize
         slBrightness.value += slBrightness.stepSize
         slContrast.value -= slContrast.stepSize
+
         val img2 = (ivPhoto.getDrawable() as BitmapDrawable).bitmap
         val RGB2 = singleColor(img2, 80, 90)
         val message2 = "val0 ${RGB0} val2 ${RGB2}"
         if (RGB0 != null) {
-            assertEquals(message2,149, RGB2.first)
-            assertEquals(message2,149, RGB2.second)
-            assertEquals(message2,149, RGB2.third)
+            assertTrue(message2,Math.abs(87-RGB2.first) <= marginError)
+            assertTrue(message2,Math.abs(87-RGB2.second) <= marginError)
+            assertTrue(message2,Math.abs(87-RGB2.third) <= marginError)
         }
     }
 
@@ -174,35 +179,5 @@ class Stage5UnitTest {
         val bitmapOut = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565)
         bitmapOut.setPixels(pixels, 0, width, 0, 0, width, height)
         return bitmapOut
-    }
-
-    fun changeBrightness(colorValue:Int, filterValue:Double):Int {
-        return Math.max(Math.min(colorValue + filterValue, 255.0),0.0).toInt()
-    }
-
-    private fun createGalleryPickActivityResultStub2(activity: MainActivity): Intent {
-        val resources: Resources = InstrumentationRegistry.getInstrumentation().context.resources
-        val imageUri = Uri.Builder()
-            .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
-            .authority(resources.getResourcePackageName(R.drawable.myexample))
-            .appendPath(resources.getResourceTypeName(R.drawable.myexample))
-            .appendPath(resources.getResourceEntryName(R.drawable.myexample))
-            .build()
-        val resultIntent = Intent()
-        val uri = getUriToDrawable(activity,R.drawable.myexample)
-        resultIntent.setData(uri)
-        return resultIntent
-    }
-
-    fun getUriToDrawable(
-        context: Context,
-        drawableId: Int
-    ): Uri {
-        return Uri.parse(
-            ContentResolver.SCHEME_ANDROID_RESOURCE +
-                    "://" + context.getResources().getResourcePackageName(drawableId)
-                    + '/' + context.getResources().getResourceTypeName(drawableId)
-                    + '/' + context.getResources().getResourceEntryName(drawableId)
-        )
     }
 }

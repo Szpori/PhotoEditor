@@ -22,7 +22,7 @@ import java.io.OutputStream
 class MainActivity : AppCompatActivity() {
 
     private lateinit var selectedImage: ImageView
-    public lateinit var resultLauncher: ActivityResultLauncher<Intent>
+    private lateinit var resultLauncher: ActivityResultLauncher<Intent>
     private lateinit var brightnessSlider: Slider
     private lateinit var contrastSlider: Slider
     private lateinit var saturationSlider: Slider
