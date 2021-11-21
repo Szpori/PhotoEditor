@@ -26,7 +26,7 @@ class Stage2UnitTest {
     private val activityController = Robolectric.buildActivity(MainActivity::class.java)
     val activity = activityController.setup().get()
 
-    val marginError = 3
+    val marginError = 1
 
     @Test
     fun testShouldCheckSliderExist() {
