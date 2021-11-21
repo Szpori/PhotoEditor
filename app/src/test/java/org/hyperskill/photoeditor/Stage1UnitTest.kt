@@ -3,6 +3,7 @@ package org.hyperskill.photoeditor
 import android.app.Activity
 import android.app.Instrumentation
 import android.content.ContentResolver
+import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
 import android.net.Uri
@@ -17,18 +18,13 @@ import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows
 import org.robolectric.shadows.ShadowActivity
-
 import org.robolectric.Shadows.shadowOf
-
-
-
 
 
 @RunWith(RobolectricTestRunner::class)
 class Stage1UnitTest {
 
     private val activityController = Robolectric.buildActivity(MainActivity::class.java)
-    private lateinit var res: Resources
     val activity = activityController.setup().get()
 
     @Test
@@ -85,7 +81,7 @@ class Stage1UnitTest {
 
         val shadowActivity: ShadowActivity = Shadows.shadowOf(activity)
 
-        val activityResult = createGalleryPickActivityResultStub2()
+        val activityResult = createGalleryPickActivityResultStub(activity)
 
         val intent = shadowActivity!!.peekNextStartedActivityForResult().intent
 
@@ -99,16 +95,22 @@ class Stage1UnitTest {
         assertEquals(R.drawable.myexample, shadowOf(ivPhoto.getDrawable()).getCreatedFromResId())
     }
 
-    private fun createGalleryPickActivityResultStub2(): Intent {
-        val resources: Resources = InstrumentationRegistry.getInstrumentation().context.resources
-        val imageUri = Uri.Builder()
-            .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
-            .authority(resources.getResourcePackageName(R.drawable.myexample))
-            .appendPath(resources.getResourceTypeName(R.drawable.myexample))
-            .appendPath(resources.getResourceEntryName(R.drawable.myexample))
-            .build()
+    fun createGalleryPickActivityResultStub(activity: MainActivity): Intent {
         val resultIntent = Intent()
-        resultIntent.setData(imageUri)
+        val uri = getUriToDrawable(activity,R.drawable.myexample)
+        resultIntent.setData(uri)
         return resultIntent
+    }
+
+    fun getUriToDrawable(
+        context: Context,
+        drawableId: Int
+    ): Uri {
+        return Uri.parse(
+            ContentResolver.SCHEME_ANDROID_RESOURCE +
+                    "://" + context.getResources().getResourcePackageName(drawableId)
+                    + '/' + context.getResources().getResourceTypeName(drawableId)
+                    + '/' + context.getResources().getResourceEntryName(drawableId)
+        )
     }
 }
