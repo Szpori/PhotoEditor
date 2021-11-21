@@ -84,7 +84,7 @@ class Stage1UnitTest {
 
         val shadowActivity: ShadowActivity = shadowOf(activity)
 
-        val activityResult = createGalleryPickActivityResultStub2()
+        val activityResult = createGalleryPickActivityResultStub()
 
         val intent = shadowActivity!!.peekNextStartedActivityForResult().intent
 
@@ -97,7 +97,7 @@ class Stage1UnitTest {
         assertEquals(myexample, shadowOf(ivPhoto.getDrawable()).getCreatedFromResId())
     }
 
-    private fun createGalleryPickActivityResultStub2(): Intent {
+    private fun createGalleryPickActivityResultStub(): Intent {
         val resources: Resources = InstrumentationRegistry.getInstrumentation().context.resources
         val imageUri = Uri.Builder()
             .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
