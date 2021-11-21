@@ -1,16 +1,13 @@
 package org.hyperskill.photoeditor
 
 import android.app.Activity
-import android.app.Instrumentation
 import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
-import android.content.res.Resources
 import android.net.Uri
 import android.provider.MediaStore
 import android.widget.Button
 import android.widget.ImageView
-import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Assert.*
 import org.junit.Test
 import org.junit.runner.RunWith
