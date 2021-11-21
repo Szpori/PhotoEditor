@@ -22,7 +22,7 @@ import java.io.OutputStream
 class MainActivity : AppCompatActivity() {
 
     private lateinit var selectedImage: ImageView
-    public lateinit var resultLauncher: ActivityResultLauncher<Intent>
+    private lateinit var resultLauncher: ActivityResultLauncher<Intent>
     private lateinit var brightnessSlider: Slider
     private lateinit var defaultImageBitMap: Bitmap
     private lateinit var buttonSave: Button
@@ -114,9 +114,9 @@ class MainActivity : AppCompatActivity() {
                 // get current index in 2D-matrix
                 index = y * width + x
                 // get color
-                R = x % 100
-                G = y % 100
-                B = (x+y) % 100
+                R = x % 100 + 40
+                G = y % 100 + 80
+                B = (x+y) % 100 + 120
 
                 pixels[index] = Color.rgb(R,G,B)
 
