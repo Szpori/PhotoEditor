@@ -1,15 +1,13 @@
 package org.hyperskill.photoeditor
 
 import android.app.Activity
-import android.app.Instrumentation
 import android.content.ContentResolver
+import android.content.Context
 import android.content.Intent
-import android.content.res.Resources
 import android.net.Uri
 import android.provider.MediaStore
 import android.widget.Button
 import android.widget.ImageView
-import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Assert.*
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -17,8 +15,6 @@ import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows
 import org.robolectric.shadows.ShadowActivity
-import org.hyperskill.photoeditor.R.drawable.myexample
-
 import org.robolectric.Shadows.shadowOf
 
 
@@ -26,7 +22,6 @@ import org.robolectric.Shadows.shadowOf
 class Stage1UnitTest {
 
     private val activityController = Robolectric.buildActivity(MainActivity::class.java)
-    private lateinit var res: Resources
     val activity = activityController.setup().get()
 
     @Test
@@ -49,7 +44,6 @@ class Stage1UnitTest {
     @Test
     fun testShouldCheckButtonExist() {
         val btnGallery = activity.findViewById<Button>(R.id.btnGallery)
-
         val message = "does view with id \"btnGalllery\" placed in activity?"
         assertNotNull(message, btnGallery)
     }
@@ -67,7 +61,7 @@ class Stage1UnitTest {
         // An Android "Activity" doesn't expose a way to find out about activities it launches
         // Robolectric's "ShadowActivity" keeps track of all launched activities and exposes this information
         // through the "getNextStartedActivity" method.
-        val shadowActivity: ShadowActivity = shadowOf(activity)
+        val shadowActivity: ShadowActivity = Shadows.shadowOf(activity)
         val actualIntent = shadowActivity.nextStartedActivity
 
         // Determine if two intents are the same for the purposes of intent resolution (filtering).
@@ -82,9 +76,9 @@ class Stage1UnitTest {
         val ivPhoto = activity.findViewById<ImageView>(R.id.ivPhoto)
         btnGallery.performClick()
 
-        val shadowActivity: ShadowActivity = shadowOf(activity)
+        val shadowActivity: ShadowActivity = Shadows.shadowOf(activity)
 
-        val activityResult = createGalleryPickActivityResultStub()
+        val activityResult = createGalleryPickActivityResultStub(activity)
 
         val intent = shadowActivity!!.peekNextStartedActivityForResult().intent
 
@@ -93,20 +87,27 @@ class Stage1UnitTest {
             Activity.RESULT_OK,
             activityResult)
 
+
         assertNotNull(ivPhoto.drawable)
-        assertEquals(myexample, shadowOf(ivPhoto.getDrawable()).getCreatedFromResId())
+        assertEquals(R.drawable.myexample, shadowOf(ivPhoto.getDrawable()).getCreatedFromResId())
     }
 
-    private fun createGalleryPickActivityResultStub(): Intent {
-        val resources: Resources = InstrumentationRegistry.getInstrumentation().context.resources
-        val imageUri = Uri.Builder()
-            .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
-            .authority(resources.getResourcePackageName(myexample))
-            .appendPath(resources.getResourceTypeName(myexample))
-            .appendPath(resources.getResourceEntryName(myexample))
-            .build()
+    fun createGalleryPickActivityResultStub(activity: MainActivity): Intent {
         val resultIntent = Intent()
-        resultIntent.setData(imageUri)
+        val uri = getUriToDrawable(activity,R.drawable.myexample)
+        resultIntent.setData(uri)
         return resultIntent
+    }
+
+    fun getUriToDrawable(
+        context: Context,
+        drawableId: Int
+    ): Uri {
+        return Uri.parse(
+            ContentResolver.SCHEME_ANDROID_RESOURCE +
+                    "://" + context.getResources().getResourcePackageName(drawableId)
+                    + '/' + context.getResources().getResourceTypeName(drawableId)
+                    + '/' + context.getResources().getResourceEntryName(drawableId)
+        )
     }
 }
