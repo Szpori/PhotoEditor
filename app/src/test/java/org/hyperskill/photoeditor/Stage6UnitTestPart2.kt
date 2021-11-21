@@ -11,9 +11,7 @@ import org.junit.runner.RunWith
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import android.os.Looper.getMainLooper
-import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
 import kotlinx.coroutines.*
 import org.robolectric.Shadows.shadowOf
 
@@ -46,7 +44,7 @@ class Stage6UnitTestPart2 {
         val model = runBlocking() {
             val model = mockk<IFilterApplier>(relaxed = true)
             //val model = BrightnessFilter(slBrightness, ivPhoto, coroutineContext)
-            model.setBrightness(img0, slBrightness.value.toInt(), slContrast.value.toInt(), slSaturation.value.toInt(), slGamma.value.toInt())
+            model.applyFilterChange(img0, slBrightness.value.toInt(), slContrast.value.toInt(), slSaturation.value.toInt(), slGamma.value.toInt())
             model
         }
         shadowOf(getMainLooper()).idle()

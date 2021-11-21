@@ -10,7 +10,7 @@ interface IFilterApplier {
     val selectedImage:ImageView
     val parentContext: CoroutineContext
 
-    suspend fun setBrightness(defaultImageBitMap: Bitmap, brightnessValue:Int, contrast:Int, saturation:Int, gamma:Int) {
+    suspend fun applyFilterChange(defaultImageBitMap: Bitmap, brightnessValue:Int, contrast:Int, saturation:Int, gamma:Int) {
     }
 }
 

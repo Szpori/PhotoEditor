@@ -32,7 +32,7 @@ class SliderExecutor(
 
     fun applyFilterChange() {
         GlobalScope.launch(Dispatchers.Main) {
-            filterApplier.setBrightness(defaultImageBitMap, slBrightness.value.toInt(), slContrast.value.toInt(), slSaturation.value.toInt(), slGamma.value.toInt())
+            filterApplier.applyFilterChange(defaultImageBitMap, slBrightness.value.toInt(), slContrast.value.toInt(), slSaturation.value.toInt(), slGamma.value.toInt())
         }
     }
 }

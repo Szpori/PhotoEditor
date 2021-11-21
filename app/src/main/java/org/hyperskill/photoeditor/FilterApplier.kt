@@ -13,7 +13,7 @@ class FilterApplier(
     override val parentContext: CoroutineContext
 ) :IFilterApplier {
     private val modelScope = CoroutineScope(parentContext)
-    override suspend fun setBrightness(defaultImageBitMap:Bitmap, brightnessValue:Int, contrast:Int, saturation:Int, gamma:Int) {
+    override suspend fun applyFilterChange(defaultImageBitMap:Bitmap, brightnessValue:Int, contrast:Int, saturation:Int, gamma:Int) {
         val filteredDeferred = modelScope.async(Dispatchers.Default) {
            apply(defaultImageBitMap, brightnessValue, contrast, saturation, gamma)
         }

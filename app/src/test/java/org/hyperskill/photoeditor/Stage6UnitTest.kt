@@ -128,7 +128,7 @@ class Stage6UnitTest {
             }
             every {
                 runBlocking {
-                    model.setBrightness(any(),any(),any(),any(),any())
+                    model.applyFilterChange(any(),any(),any(),any(),any())
                 }
             } returns Unit
             shadowOf(getMainLooper()).idle()
@@ -149,7 +149,7 @@ class Stage6UnitTest {
 
         verify {
             runBlocking {
-                model.setBrightness(any(),any(), any(), any(), any())
+                model.applyFilterChange(any(),any(), any(), any(), any())
             }
             shadowOf(getMainLooper()).idle()
         }
