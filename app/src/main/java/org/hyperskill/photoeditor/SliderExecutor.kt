@@ -7,21 +7,32 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 class SliderExecutor(
-    val brightnessFilter: IBrightnessFilter,
-    slBrightness:Slider,
+    val filterApplier: IFilterApplier,
+    val slBrightness: Slider,
+    val slContrast: Slider,
+    val slSaturation: Slider,
+    val slGamma: Slider,
     var defaultImageBitMap:Bitmap
 ) {
-    val slBrightness:Slider = slBrightness
 
     init {
         slBrightness.addOnChangeListener { slider, value, fromUser ->
-            setBrightnessValue()
+            applyFilterChange()
+        }
+        slContrast.addOnChangeListener { slider, value, fromUser ->
+            applyFilterChange()
+        }
+        slSaturation.addOnChangeListener { slider, value, fromUser ->
+            applyFilterChange()
+        }
+        slGamma.addOnChangeListener { slider, value, fromUser ->
+            applyFilterChange()
         }
     }
 
-    fun setBrightnessValue() {
+    fun applyFilterChange() {
         GlobalScope.launch(Dispatchers.Main) {
-            brightnessFilter.setBrightness(defaultImageBitMap, slBrightness.value.toInt())
+            filterApplier.setBrightness(defaultImageBitMap, slBrightness.value.toInt(), slContrast.value.toInt(), slSaturation.value.toInt(), slGamma.value.toInt())
         }
     }
 }

@@ -23,12 +23,13 @@ import java.io.OutputStream
 class MainActivity : AppCompatActivity() {
 
     private lateinit var selectedImage: ImageView
-    public lateinit var resultLauncher: ActivityResultLauncher<Intent>
+    private lateinit var resultLauncher: ActivityResultLauncher<Intent>
     private lateinit var brightnessSlider: Slider
-    //private lateinit var defaultImageBitMap: Bitmap
+    private lateinit var contrastSlider: Slider
+    private lateinit var saturationSlider: Slider
+    private lateinit var gammaSlider: Slider
     private lateinit var buttonSave: Button
     private lateinit var sliderExecutor: SliderExecutor
-    //lateinit var brightnessFilter: BrightnessFilter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,8 +66,8 @@ class MainActivity : AppCompatActivity() {
         val defaultImageBitMap = (selectedImage.getDrawable() as BitmapDrawable).bitmap
 
 
-        val brightnessFilter = BrightnessFilter(selectedImage, Dispatchers.Default)
-        sliderExecutor = SliderExecutor(brightnessFilter, brightnessSlider, defaultImageBitMap)
+        val brightnessFilter = FilterApplier(selectedImage, Dispatchers.Default)
+        sliderExecutor = SliderExecutor(brightnessFilter, brightnessSlider, contrastSlider, saturationSlider, gammaSlider, defaultImageBitMap)
     }
 
     fun saveImage() {
@@ -90,20 +91,12 @@ class MainActivity : AppCompatActivity() {
         sliderExecutor.defaultImageBitMap = resize(defaultImageBitMap, 1224, 1632)
     }
 
-    /*
-    fun setBrightnessValue() {
-        GlobalScope.launch(Dispatchers.Main) {
-            brightnessFilter.setBrightness(defaultImageBitMap, brightnessSlider.value.toInt())
-        }
-    }
-
-     */
-
-
-
     private fun bindViews() {
         selectedImage = findViewById(R.id.ivPhoto)
         brightnessSlider = findViewById(R.id.slBrightness)
+        contrastSlider = findViewById(R.id.slContrast)
+        saturationSlider = findViewById(R.id.slSaturation)
+        gammaSlider = findViewById(R.id.slGamma)
         buttonSave = findViewById(R.id.btnSave)
     }
 
@@ -153,9 +146,9 @@ class MainActivity : AppCompatActivity() {
                 // get current index in 2D-matrix
                 index = y * width + x
                 // get color
-                R = x % 100
-                G = y % 100
-                B = (x+y) % 100
+                R = x % 100 + 40
+                G = y % 100 + 80
+                B = (x+y) % 100 + 120
 
                 pixels[index] = Color.rgb(R,G,B)
 
