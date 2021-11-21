@@ -37,19 +37,18 @@ class Stage4UnitTest {
         val message = "does view with id \"slContrast\" placed in activity?"
         assertNotNull(message, slContrast)
 
-        val message2 = "\"slider\" should have proper stepSize attribute"
+        val message2 = "\"slider contrast\" should have proper stepSize attribute"
         assertEquals(message2, slContrast.stepSize, 10f)
 
-        val message3 = "\"slider\" should have proper valueFrom attribute"
+        val message3 = "\"slider contrast\" should have proper valueFrom attribute"
         assertEquals(message3, slContrast.valueFrom, -250f)
 
-        val message4 = "\"slider\" should have proper valueTo attribute"
+        val message4 = "\"slider contrast\" should have proper valueTo attribute"
         assertEquals(message4, slContrast.valueTo, 250f)
 
-        val message5 = "\"slider\" should have proper initial value"
+        val message5 = "\"slider contrast\" should have proper initial value"
         assertEquals(message5, slContrast.value, 0f)
     }
-
     @Test
     fun testShouldCheckSliderNotCrashingByDefault() {
         val slContrast = activity.findViewById<Slider>(R.id.slContrast)
