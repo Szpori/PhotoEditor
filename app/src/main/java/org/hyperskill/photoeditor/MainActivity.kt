@@ -29,30 +29,31 @@ class MainActivity : AppCompatActivity() {
     private lateinit var saturationSlider: Slider
     private lateinit var gammaSlider: Slider
     private lateinit var buttonSave: Button
-    private lateinit var sliderExecutor: SliderExecutor
+    private lateinit var filterApplier:FilterApplier
+
+    private lateinit var defaultImageBitMap:Bitmap
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         bindViews()
 
-        /*
-        GlobalScope.launch(Dispatchers.Main) {
-            brightnessFilter = BrightnessFilter(selectedImage, Dispatchers.Default)
-        }
-
-         */
-
         buttonSave.setOnClickListener {
             saveImage()
         }
 
-        /*
         brightnessSlider.addOnChangeListener { slider, value, fromUser ->
-            setBrightnessValue()
+            applyFilterChange()
         }
-
-         */
+        contrastSlider.addOnChangeListener { slider, value, fromUser ->
+            applyFilterChange()
+        }
+        saturationSlider.addOnChangeListener { slider, value, fromUser ->
+            applyFilterChange()
+        }
+        gammaSlider.addOnChangeListener { slider, value, fromUser ->
+            applyFilterChange()
+        }
 
         resultLauncher = registerForActivityResult(StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
@@ -62,12 +63,15 @@ class MainActivity : AppCompatActivity() {
 
         //do not change this line
         selectedImage!!.setImageBitmap(createBitmap())
+        defaultImageBitMap = (selectedImage.getDrawable() as BitmapDrawable).bitmap
 
-        val defaultImageBitMap = (selectedImage.getDrawable() as BitmapDrawable).bitmap
+        filterApplier = FilterApplier(selectedImage, Dispatchers.Default)
+    }
 
-
-        val brightnessFilter = FilterApplier(selectedImage, Dispatchers.Default)
-        sliderExecutor = SliderExecutor(brightnessFilter, brightnessSlider, contrastSlider, saturationSlider, gammaSlider, defaultImageBitMap)
+    private fun applyFilterChange() {
+        GlobalScope.launch(Dispatchers.Main) {
+            filterApplier.applyFilterChange(defaultImageBitMap, brightnessSlider.value.toInt(), contrastSlider.value.toInt(), saturationSlider.value.toInt(), gammaSlider.value.toInt())
+        }
     }
 
     fun saveImage() {
@@ -87,8 +91,8 @@ class MainActivity : AppCompatActivity() {
         val data: Intent? = result.data
         val contentUri = data!!.data
         selectedImage!!.setImageURI(contentUri)
-        val defaultImageBitMap = (selectedImage.getDrawable() as BitmapDrawable).bitmap
-        sliderExecutor.defaultImageBitMap = resize(defaultImageBitMap, 1224, 1632)
+        val bitmap = (selectedImage.getDrawable() as BitmapDrawable).bitmap
+        defaultImageBitMap = resize(bitmap, 1224, 1632)
     }
 
     private fun bindViews() {

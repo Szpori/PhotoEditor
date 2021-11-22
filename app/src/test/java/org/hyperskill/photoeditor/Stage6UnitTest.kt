@@ -31,8 +31,7 @@ class Stage6UnitTest {
 
     private val activityController = Robolectric.buildActivity(MainActivity::class.java)
     val activity = activityController.setup().get()
-
-    val marginError = 1
+    val marginError = 3
 
     @Test
     fun testShouldCheckSliderExist() {
@@ -94,13 +93,42 @@ class Stage6UnitTest {
         slBrightness.value -= slBrightness.stepSize
     }
 
-
     @Test
-    fun testShouldCheckNewBitmapEditCoroutine() {
+    fun testShouldCheckDefaultBitmapEditCoroutine() {
         val slBrightness = activity.findViewById<Slider>(R.id.slBrightness)
         val slContrast = activity.findViewById<Slider>(R.id.slContrast)
         val slSaturation = activity.findViewById<Slider>(R.id.slSaturation)
         val slGamma = activity.findViewById<Slider>(R.id.slGamma)
+        val ivPhoto = activity.findViewById<ImageView>(R.id.ivPhoto)
+
+        var img0 = (ivPhoto.getDrawable() as BitmapDrawable).bitmap
+        var RGB0 = img0?.let { singleColor(it,80, 90) }
+
+        runBlocking(Dispatchers.Default) {
+            slGamma.value += slGamma.stepSize*5
+            slContrast.value += slContrast.stepSize*9
+            slSaturation.value += slSaturation.stepSize*9
+            slBrightness.value += slBrightness.stepSize
+        }
+        shadowOf(getMainLooper()).idle()
+        Thread.sleep(2000)
+
+        shadowOf(getMainLooper()).idle()
+
+        val img2 = (ivPhoto.getDrawable() as BitmapDrawable).bitmap
+        val RGB2 = singleColor(img2, 80, 90)
+        val message2 = "val0 ${RGB0} val2 ${RGB2}"
+
+        if (RGB0 != null) {
+            assertTrue(message2,Math.abs(RGB0.first-72-RGB2.first) <= marginError)
+            assertTrue(message2,Math.abs(RGB0.second+69-RGB2.second) <= marginError)
+            assertTrue(message2,Math.abs(RGB0.third+65-RGB2.third) <= marginError)
+        }
+    }
+
+    @Test
+    fun testShouldCheckNewBitmapEditCoroutine() {
+        val slBrightness = activity.findViewById<Slider>(R.id.slBrightness)
         val ivPhoto = activity.findViewById<ImageView>(R.id.ivPhoto)
         val btnGallery = activity.findViewById<Button>(R.id.btnGallery)
         btnGallery.performClick()
@@ -116,43 +144,27 @@ class Stage6UnitTest {
             activityResult)
 
         var img0 = (ivPhoto.getDrawable() as BitmapDrawable).bitmap
-        var RGB0 = img0?.let { singleColor(it) }
+        var RGB0 = img0?.let { singleColor(it,80, 90) }
 
-            val model = runBlocking() {
-                slBrightness.value += slBrightness.stepSize*2
-                slBrightness.value += slBrightness.stepSize
-                val model = mockk<IFilterApplier>(relaxed = true)
-                //val model = BrightnessFilter(slBrightness, ivPhoto, coroutineContext)
-                //model.setBrightness(defaultBitmap, slBrightness.value.toInt())
-                model
-            }
-            every {
-                runBlocking {
-                    model.applyFilterChange(any(),any(),any(),any(),any())
-                }
-            } returns Unit
-            shadowOf(getMainLooper()).idle()
-
-            val img2 = (ivPhoto.getDrawable() as BitmapDrawable).bitmap
-            val RGB2 = singleColor(img2)
-            val message2 = "val0 ${RGB0} val2 ${RGB2}"
-
-            if (RGB0 != null) {
-                assertTrue(message2, Math.abs(RGB0.first + slBrightness.stepSize*3 - RGB2.first) <= marginError)
-                assertTrue(message2, Math.abs(RGB0.second + slBrightness.stepSize*3 - RGB2.second) <= marginError)
-                assertTrue(message2, Math.abs(RGB0.third + slBrightness.stepSize*3 - RGB2.third) <= marginError)
-            }
-
-        val sliderExecutor = SliderExecutor(model, slBrightness, slContrast, slSaturation, slGamma, img0)
-        sliderExecutor.slBrightness.value +=  sliderExecutor.slBrightness.stepSize
-        sliderExecutor.slBrightness.value -=  sliderExecutor.slBrightness.stepSize
-
-        verify {
-            runBlocking {
-                model.applyFilterChange(any(),any(), any(), any(), any())
-            }
-            shadowOf(getMainLooper()).idle()
+        runBlocking(Dispatchers.Default) {
+            slBrightness.value += slBrightness.stepSize
         }
+        shadowOf(getMainLooper()).idle()
+        Thread.sleep(2000)
+
+        shadowOf(getMainLooper()).idle()
+
+        val img2 = (ivPhoto.getDrawable() as BitmapDrawable).bitmap
+        val RGB2 = singleColor(img2, 80, 90)
+        val message2 = "val0 ${RGB0} val2 ${RGB2}"
+
+        if (RGB0 != null) {
+            assertTrue(message2,Math.abs(RGB0.first+10-RGB2.first) <= marginError)
+            assertTrue(message2,Math.abs(RGB0.second+10-RGB2.second) <= marginError)
+            assertTrue(message2,Math.abs(RGB0.third+10-RGB2.third) <= marginError)
+        }
+
+
     }
 
 
@@ -197,14 +209,14 @@ class Stage6UnitTest {
                 // get color
                 R = x % 100 + 40
                 G = y % 100 + 80
-                B = (x + y) % 100 + 120
+                B = (x+y) % 100 + 120
 
-                pixels[index] = Color.rgb(R, G, B)
+                pixels[index] = Color.rgb(R,G,B)
 
             }
         }
         // output bitmap
-        val bitmapOut = Bitmap.createBitmap(width, height, android.graphics.Bitmap.Config.RGB_565)
+        val bitmapOut = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565)
         bitmapOut.setPixels(pixels, 0, width, 0, 0, width, height)
         return bitmapOut
     }

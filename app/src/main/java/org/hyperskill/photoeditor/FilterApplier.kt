@@ -9,11 +9,11 @@ import kotlinx.coroutines.async
 import kotlin.coroutines.CoroutineContext
 
 class FilterApplier(
-    override val selectedImage: ImageView,
-    override val parentContext: CoroutineContext
-) :IFilterApplier {
+    val selectedImage: ImageView,
+    val parentContext: CoroutineContext
+)  {
     private val modelScope = CoroutineScope(parentContext)
-    override suspend fun applyFilterChange(defaultImageBitMap:Bitmap, brightnessValue:Int, contrast:Int, saturation:Int, gamma:Int) {
+    suspend fun applyFilterChange(defaultImageBitMap:Bitmap, brightnessValue:Int, contrast:Int, saturation:Int, gamma:Int) {
         val filteredDeferred = modelScope.async(Dispatchers.Default) {
            apply(defaultImageBitMap, brightnessValue, contrast, saturation, gamma)
         }
