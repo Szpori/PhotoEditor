@@ -1,13 +1,8 @@
 package org.hyperskill.photoeditor
 
-import android.app.Activity
-import android.content.ContentResolver
-import android.content.Context
-import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
-import android.net.Uri
 import android.widget.ImageView
 import com.google.android.material.slider.Slider
 import org.junit.Assert.*
@@ -16,14 +11,8 @@ import org.junit.runner.RunWith
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import android.os.Looper.getMainLooper
-import android.widget.Button
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.verify
-import kotlinx.coroutines.*
-import org.robolectric.Shadows
 import org.robolectric.Shadows.shadowOf
-import org.robolectric.shadows.ShadowActivity
+
 
 
 @RunWith(RobolectricTestRunner::class)
