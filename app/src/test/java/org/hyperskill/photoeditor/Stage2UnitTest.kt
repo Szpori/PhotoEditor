@@ -8,9 +8,12 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
+import android.os.Looper
 import android.widget.Button
 import android.widget.ImageView
 import com.google.android.material.slider.Slider
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert.*
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -75,18 +78,43 @@ class Stage2UnitTest {
         val ivPhoto = activity.findViewById<ImageView>(R.id.ivPhoto)
         var img0 = (ivPhoto.getDrawable() as BitmapDrawable).bitmap
         var RGB0 = img0?.let { singleColor(it) }
-        slBrightness.value += slBrightness.stepSize * 2
-        slBrightness.value += slBrightness.stepSize
-        val img2 = (ivPhoto.getDrawable() as BitmapDrawable).bitmap
-        val RGB2 = singleColor(img2)
-        val message2 = "val0 ${RGB0} val2 ${RGB2}"
-        if (RGB0 != null) {
-            assertTrue(message2, Math.abs(RGB0.first + 30 - RGB2.first) <= marginError)
-            assertTrue(message2, Math.abs(RGB0.second + 30 - RGB2.second) <= marginError)
-            assertTrue(message2, Math.abs(RGB0.third + 30 - RGB2.third) <= marginError)
+        runBlocking(Dispatchers.Default) {
+            slBrightness.value += slBrightness.stepSize * 5
+            slBrightness.value += slBrightness.stepSize * 6
+
+            Shadows.shadowOf(Looper.getMainLooper()).idle()
+            Thread.sleep(200)
+            Shadows.shadowOf(Looper.getMainLooper()).idle()
         }
 
-        slBrightness.value -= slBrightness.stepSize * 3
+        var img2 = (ivPhoto.getDrawable() as BitmapDrawable).bitmap
+        var RGB2 = singleColor(img2)
+        var message2 = "val0 ${RGB0} val2 ${RGB2}"
+        if (RGB0 != null) {
+            assertTrue(message2, Math.abs(RGB0.first + 110 - RGB2.first) <= marginError)
+            assertTrue(message2, Math.abs(RGB0.second + 110 - RGB2.second) <= marginError)
+            assertTrue(message2, Math.abs(RGB0.third + 105 - RGB2.third) <= marginError)
+        }
+
+        runBlocking(Dispatchers.Default) {
+            slBrightness.value -= slBrightness.stepSize*10
+            slBrightness.value -= slBrightness.stepSize*13
+
+            Shadows.shadowOf(Looper.getMainLooper()).idle()
+            Thread.sleep(200)
+            Shadows.shadowOf(Looper.getMainLooper()).idle()
+        }
+
+        img2 = (ivPhoto.getDrawable() as BitmapDrawable).bitmap
+        RGB2 = singleColor(img2)
+        message2 = "val0 ${RGB0} val2 ${RGB2}"
+        if (RGB0 != null) {
+            assertTrue(message2, Math.abs(RGB0.first - 110 - RGB2.first) <= marginError)
+            assertTrue(message2, Math.abs(RGB0.second - 120 - RGB2.second) <= marginError)
+            assertTrue(message2, Math.abs(RGB0.third - 120 - RGB2.third) <= marginError)
+        }
+
+        slBrightness.value -= slBrightness.stepSize * 8
     }
 
 
@@ -111,82 +139,23 @@ class Stage2UnitTest {
         var img0 = (ivPhoto.getDrawable() as BitmapDrawable).bitmap
         var RGB0 = img0?.let { singleColor(it) }
 
-        for (i in 1..3) {
-            slBrightness.value += slBrightness.stepSize
-            val img2 = (ivPhoto.getDrawable() as BitmapDrawable).bitmap
-            val RGB2 = singleColor(img2)
-            val message2 = "val0 ${RGB0} val2 ${RGB2}"
-            if (RGB0 != null) {
-                assertTrue(
-                    message2,
-                    Math.abs(
-                        changeBrightness(
-                            RGB0.first,
-                            slBrightness.stepSize.toInt() * i
-                        ) - RGB2.first
-                    ) <= marginError
-                )
-                assertTrue(
-                    message2,
-                    Math.abs(
-                        changeBrightness(
-                            RGB0.second,
-                            slBrightness.stepSize.toInt() * i
-                        ) - RGB2.first
-                    ) <= marginError
-                )
-                assertTrue(
-                    message2,
-                    Math.abs(
-                        changeBrightness(
-                            RGB0.third,
-                            slBrightness.stepSize.toInt() * i
-                        ) - RGB2.first
-                    ) <= marginError
-                )
-            }
+        runBlocking(Dispatchers.Default) {
+            slBrightness.value += slBrightness.stepSize * 3
+            slBrightness.value += slBrightness.stepSize * 2
+            Shadows.shadowOf(Looper.getMainLooper()).idle()
+            Thread.sleep(200)
+            Shadows.shadowOf(Looper.getMainLooper()).idle()
         }
 
-        img0 = (ivPhoto.getDrawable() as BitmapDrawable).bitmap
-        RGB0 = img0?.let { singleColor(it) }
+        val img2 = (ivPhoto.getDrawable() as BitmapDrawable).bitmap
+        val RGB2 = singleColor(img2, 80, 90)
+        val message2 = "val0 ${RGB0} val2 ${RGB2}"
 
-
-        for (i in 1..3) {
-            slBrightness.value -= slBrightness.stepSize
-            val img2 = (ivPhoto.getDrawable() as BitmapDrawable).bitmap
-            val RGB2 = singleColor(img2)
-            val message2 = "val0 ${RGB0} val2 ${RGB2}"
-            if (RGB0 != null) {
-                assertTrue(
-                    message2,
-                    Math.abs(
-                        changeBrightness(
-                            RGB0.first,
-                            -slBrightness.stepSize.toInt() * i
-                        ) - RGB2.first
-                    ) <= marginError
-                )
-                assertTrue(
-                    message2,
-                    Math.abs(
-                        changeBrightness(
-                            RGB0.second,
-                            -slBrightness.stepSize.toInt() * i
-                        ) - RGB2.first
-                    ) <= marginError
-                )
-                assertTrue(
-                    message2,
-                    Math.abs(
-                        changeBrightness(
-                            RGB0.third,
-                            -slBrightness.stepSize.toInt() * i
-                        ) - RGB2.first
-                    ) <= marginError
-                )
-            }
+        if (RGB0 != null) {
+            assertTrue(message2,Math.abs(RGB0.first+50-RGB2.first) <= marginError)
+            assertTrue(message2,Math.abs(RGB0.second+50-RGB2.second) <= marginError)
+            assertTrue(message2,Math.abs(RGB0.third+50-RGB2.third) <= marginError)
         }
-
 
     }
 
