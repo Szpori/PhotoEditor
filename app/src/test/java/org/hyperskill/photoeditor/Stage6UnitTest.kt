@@ -93,80 +93,6 @@ class Stage6UnitTest {
         slBrightness.value -= slBrightness.stepSize
     }
 
-    @Test
-    fun testShouldCheckDefaultBitmapEditCoroutine() {
-        val slBrightness = activity.findViewById<Slider>(R.id.slBrightness)
-        val slContrast = activity.findViewById<Slider>(R.id.slContrast)
-        val slSaturation = activity.findViewById<Slider>(R.id.slSaturation)
-        val slGamma = activity.findViewById<Slider>(R.id.slGamma)
-        val ivPhoto = activity.findViewById<ImageView>(R.id.ivPhoto)
-
-        var img0 = (ivPhoto.getDrawable() as BitmapDrawable).bitmap
-        var RGB0 = img0?.let { singleColor(it,80, 90) }
-
-        runBlocking(Dispatchers.Default) {
-            slGamma.value += slGamma.stepSize*5
-            slContrast.value += slContrast.stepSize*9
-            slSaturation.value += slSaturation.stepSize*9
-            slBrightness.value += slBrightness.stepSize
-        }
-        shadowOf(getMainLooper()).idle()
-        Thread.sleep(2000)
-
-        shadowOf(getMainLooper()).idle()
-
-        val img2 = (ivPhoto.getDrawable() as BitmapDrawable).bitmap
-        val RGB2 = singleColor(img2, 80, 90)
-        val message2 = "val0 ${RGB0} val2 ${RGB2}"
-
-        if (RGB0 != null) {
-            assertTrue(message2,Math.abs(RGB0.first-72-RGB2.first) <= marginError)
-            assertTrue(message2,Math.abs(RGB0.second+69-RGB2.second) <= marginError)
-            assertTrue(message2,Math.abs(RGB0.third+65-RGB2.third) <= marginError)
-        }
-    }
-
-    @Test
-    fun testShouldCheckNewBitmapEditCoroutine() {
-        val slBrightness = activity.findViewById<Slider>(R.id.slBrightness)
-        val ivPhoto = activity.findViewById<ImageView>(R.id.ivPhoto)
-        val btnGallery = activity.findViewById<Button>(R.id.btnGallery)
-        btnGallery.performClick()
-        val shadowActivity: ShadowActivity = Shadows.shadowOf(activity)
-        // Determine if two intents are the same for the purposes of intent resolution (filtering).
-        // That is, if their action, data, type, class, and categories are the same. This does
-        // not compare any extra data included in the intents
-        val activityResult = createGalleryPickActivityResultStub(activity)
-        val intent = shadowActivity!!.peekNextStartedActivityForResult().intent
-        Shadows.shadowOf(activity).receiveResult(
-            intent,
-            Activity.RESULT_OK,
-            activityResult)
-
-        var img0 = (ivPhoto.getDrawable() as BitmapDrawable).bitmap
-        var RGB0 = img0?.let { singleColor(it,80, 90) }
-
-        runBlocking(Dispatchers.Default) {
-            slBrightness.value += slBrightness.stepSize
-        }
-        shadowOf(getMainLooper()).idle()
-        Thread.sleep(2000)
-
-        shadowOf(getMainLooper()).idle()
-
-        val img2 = (ivPhoto.getDrawable() as BitmapDrawable).bitmap
-        val RGB2 = singleColor(img2, 80, 90)
-        val message2 = "val0 ${RGB0} val2 ${RGB2}"
-
-        if (RGB0 != null) {
-            assertTrue(message2,Math.abs(RGB0.first+10-RGB2.first) <= marginError)
-            assertTrue(message2,Math.abs(RGB0.second+10-RGB2.second) <= marginError)
-            assertTrue(message2,Math.abs(RGB0.third+10-RGB2.third) <= marginError)
-        }
-
-
-    }
-
 
     fun singleColor(source: Bitmap, x0: Int = 60, y0: Int = 70): Triple<Int, Int, Int> {
         val width = source.width
@@ -221,26 +147,5 @@ class Stage6UnitTest {
         return bitmapOut
     }
 
-    fun changeBrightness(colorValue:Int, filterValue:Int):Int {
-        return Math.max(Math.min(colorValue + filterValue, 255),0)
-    }
 
-    fun createGalleryPickActivityResultStub(activity: MainActivity): Intent {
-        val resultIntent = Intent()
-        val uri = getUriToDrawable(activity, R.drawable.myexample)
-        resultIntent.setData(uri)
-        return resultIntent
-    }
-
-    fun getUriToDrawable(
-        context: Context,
-        drawableId: Int
-    ): Uri {
-        return Uri.parse(
-            ContentResolver.SCHEME_ANDROID_RESOURCE +
-                    "://" + context.getResources().getResourcePackageName(drawableId)
-                    + '/' + context.getResources().getResourceTypeName(drawableId)
-                    + '/' + context.getResources().getResourceEntryName(drawableId)
-        )
-    }
 }
