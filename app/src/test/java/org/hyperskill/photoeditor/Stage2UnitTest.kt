@@ -8,9 +8,12 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
+import android.os.Looper
 import android.widget.Button
 import android.widget.ImageView
 import com.google.android.material.slider.Slider
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert.*
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -75,18 +78,43 @@ class Stage2UnitTest {
         val ivPhoto = activity.findViewById<ImageView>(R.id.ivPhoto)
         var img0 = (ivPhoto.getDrawable() as BitmapDrawable).bitmap
         var RGB0 = img0?.let { singleColor(it) }
-        slBrightness.value += slBrightness.stepSize*2
-        slBrightness.value += slBrightness.stepSize
-        val img2 = (ivPhoto.getDrawable() as BitmapDrawable).bitmap
-        val RGB2 = singleColor(img2)
-        val message2 = "val0 ${RGB0} val2 ${RGB2}"
-        if (RGB0 != null) {
-            assertTrue(message2,Math.abs(RGB0.first+30- RGB2.first) <= marginError)
-            assertTrue(message2,Math.abs(RGB0.second+30- RGB2.second) <= marginError)
-            assertTrue(message2,Math.abs(RGB0.third+30- RGB2.third) <= marginError)
+        runBlocking(Dispatchers.Default) {
+            slBrightness.value += slBrightness.stepSize * 5
+            slBrightness.value += slBrightness.stepSize * 6
+
+            Shadows.shadowOf(Looper.getMainLooper()).idle()
+            Thread.sleep(200)
+            Shadows.shadowOf(Looper.getMainLooper()).idle()
         }
 
-        slBrightness.value -= slBrightness.stepSize*3
+        var img2 = (ivPhoto.getDrawable() as BitmapDrawable).bitmap
+        var RGB2 = singleColor(img2)
+        var message2 = "val0 ${RGB0} val2 ${RGB2}"
+        if (RGB0 != null) {
+            assertTrue(message2, Math.abs(RGB0.first + 110 - RGB2.first) <= marginError)
+            assertTrue(message2, Math.abs(RGB0.second + 110 - RGB2.second) <= marginError)
+            assertTrue(message2, Math.abs(RGB0.third + 105 - RGB2.third) <= marginError)
+        }
+
+        runBlocking(Dispatchers.Default) {
+            slBrightness.value -= slBrightness.stepSize*10
+            slBrightness.value -= slBrightness.stepSize*13
+
+            Shadows.shadowOf(Looper.getMainLooper()).idle()
+            Thread.sleep(200)
+            Shadows.shadowOf(Looper.getMainLooper()).idle()
+        }
+
+        img2 = (ivPhoto.getDrawable() as BitmapDrawable).bitmap
+        RGB2 = singleColor(img2)
+        message2 = "val0 ${RGB0} val2 ${RGB2}"
+        if (RGB0 != null) {
+            assertTrue(message2, Math.abs(RGB0.first - 110 - RGB2.first) <= marginError)
+            assertTrue(message2, Math.abs(RGB0.second - 120 - RGB2.second) <= marginError)
+            assertTrue(message2, Math.abs(RGB0.third - 120 - RGB2.third) <= marginError)
+        }
+
+        slBrightness.value -= slBrightness.stepSize * 8
     }
 
 
@@ -105,44 +133,33 @@ class Stage2UnitTest {
         Shadows.shadowOf(activity).receiveResult(
             intent,
             Activity.RESULT_OK,
-            activityResult)
+            activityResult
+        )
 
         var img0 = (ivPhoto.getDrawable() as BitmapDrawable).bitmap
         var RGB0 = img0?.let { singleColor(it) }
 
-        for (i in 1..3) {
-            slBrightness.value += slBrightness.stepSize
-            val img2 = (ivPhoto.getDrawable() as BitmapDrawable).bitmap
-            val RGB2 = singleColor(img2)
-            val message2 = "val0 ${RGB0} val2 ${RGB2}"
-            if (RGB0 != null) {
-                assertTrue(message2,Math.abs(changeBrightness(RGB0.first,slBrightness.stepSize.toInt()*i)- RGB2.first) <= marginError)
-                assertTrue(message2,Math.abs(changeBrightness(RGB0.second,slBrightness.stepSize.toInt()*i)- RGB2.first) <= marginError)
-                assertTrue(message2,Math.abs(changeBrightness(RGB0.third,slBrightness.stepSize.toInt()*i)- RGB2.first) <= marginError)
-            }
+        runBlocking(Dispatchers.Default) {
+            slBrightness.value += slBrightness.stepSize * 3
+            slBrightness.value += slBrightness.stepSize * 2
+            Shadows.shadowOf(Looper.getMainLooper()).idle()
+            Thread.sleep(200)
+            Shadows.shadowOf(Looper.getMainLooper()).idle()
         }
 
-        img0 = (ivPhoto.getDrawable() as BitmapDrawable).bitmap
-        RGB0 = img0?.let { singleColor(it) }
+        val img2 = (ivPhoto.getDrawable() as BitmapDrawable).bitmap
+        val RGB2 = singleColor(img2, 80, 90)
+        val message2 = "val0 ${RGB0} val2 ${RGB2}"
 
-
-        for (i in 1..3) {
-            slBrightness.value -= slBrightness.stepSize
-            val img2 = (ivPhoto.getDrawable() as BitmapDrawable).bitmap
-            val RGB2 = singleColor(img2)
-            val message2 = "val0 ${RGB0} val2 ${RGB2}"
-            if (RGB0 != null) {
-                assertTrue(message2,Math.abs(changeBrightness(RGB0.first,-slBrightness.stepSize.toInt()*i)- RGB2.first) <= marginError)
-                assertTrue(message2,Math.abs(changeBrightness(RGB0.second,-slBrightness.stepSize.toInt()*i)- RGB2.first) <= marginError)
-                assertTrue(message2,Math.abs(changeBrightness(RGB0.third,-slBrightness.stepSize.toInt()*i)- RGB2.first) <= marginError)
-            }
+        if (RGB0 != null) {
+            assertTrue(message2,Math.abs(RGB0.first+50-RGB2.first) <= marginError)
+            assertTrue(message2,Math.abs(RGB0.second+50-RGB2.second) <= marginError)
+            assertTrue(message2,Math.abs(RGB0.third+50-RGB2.third) <= marginError)
         }
-
-
 
     }
 
-    fun singleColor(source: Bitmap, x0:Int = 60, y0:Int = 70): Triple<Int, Int, Int> {
+    fun singleColor(source: Bitmap, x0: Int = 60, y0: Int = 70): Triple<Int, Int, Int> {
         val width = source.width
         val height = source.height
         val pixels = IntArray(width * height)
@@ -162,7 +179,7 @@ class Stage2UnitTest {
         G = Color.green(pixels[index])
         B = Color.blue(pixels[index])
 
-        return  Triple(R,G,B)
+        return Triple(R, G, B)
     }
 
     fun createBitmap(): Bitmap {
@@ -183,9 +200,9 @@ class Stage2UnitTest {
                 // get color
                 R = x % 100 + 40
                 G = y % 100 + 80
-                B = (x+y) % 100 + 120
+                B = (x + y) % 100 + 120
 
-                pixels[index] = Color.rgb(R,G,B)
+                pixels[index] = Color.rgb(R, G, B)
 
             }
         }
@@ -195,13 +212,13 @@ class Stage2UnitTest {
         return bitmapOut
     }
 
-    fun changeBrightness(colorValue:Int, filterValue:Int):Int {
-        return Math.max(Math.min(colorValue + filterValue, 255),0)
+    fun changeBrightness(colorValue: Int, filterValue: Int): Int {
+        return Math.max(Math.min(colorValue + filterValue, 255), 0)
     }
 
     fun createGalleryPickActivityResultStub(activity: MainActivity): Intent {
         val resultIntent = Intent()
-        val uri = getUriToDrawable(activity,R.drawable.myexample)
+        val uri = getUriToDrawable(activity, R.drawable.myexample)
         resultIntent.setData(uri)
         return resultIntent
     }
@@ -217,4 +234,5 @@ class Stage2UnitTest {
                     + '/' + context.getResources().getResourceEntryName(drawableId)
         )
     }
+
 }

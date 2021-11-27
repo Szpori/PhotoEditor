@@ -1,25 +1,19 @@
 package org.hyperskill.photoeditor
 
-import android.app.Activity
-import android.content.ContentResolver
-import android.content.Context
-import android.content.Intent
-import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
-import android.net.Uri
-import android.widget.Button
+import android.os.Looper
 import android.widget.ImageView
 import com.google.android.material.slider.Slider
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert.*
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows
-import org.robolectric.shadows.ShadowActivity
-import androidx.test.platform.app.InstrumentationRegistry
 
 
 @RunWith(RobolectricTestRunner::class)
@@ -49,6 +43,7 @@ class Stage4UnitTest {
         val message5 = "\"slider contrast\" should have proper initial value"
         assertEquals(message5, slContrast.value, 0f)
     }
+
     @Test
     fun testShouldCheckSliderNotCrashingByDefault() {
         val slContrast = activity.findViewById<Slider>(R.id.slContrast)
@@ -67,9 +62,16 @@ class Stage4UnitTest {
         val ivPhoto = activity.findViewById<ImageView>(R.id.ivPhoto)
         var img0 = (ivPhoto.getDrawable() as BitmapDrawable).bitmap
         var RGB0 = img0?.let { singleColor(it,80, 90) }
-        slBrightness.value += slBrightness.stepSize
-        slContrast.value += slContrast.stepSize*9
-        slContrast.value += slContrast.stepSize
+
+        runBlocking(Dispatchers.Default) {
+            slBrightness.value += slBrightness.stepSize
+            slContrast.value += slContrast.stepSize * 9
+            slContrast.value += slContrast.stepSize
+
+            Shadows.shadowOf(Looper.getMainLooper()).idle()
+            Thread.sleep(200)
+            Shadows.shadowOf(Looper.getMainLooper()).idle()
+        }
         val img2 = (ivPhoto.getDrawable() as BitmapDrawable).bitmap
         val RGB2 = singleColor(img2, 80, 90)
         val message2 = "val0 ${RGB0} val2 ${RGB2}"
@@ -87,9 +89,16 @@ class Stage4UnitTest {
         val ivPhoto = activity.findViewById<ImageView>(R.id.ivPhoto)
         var img0 = (ivPhoto.getDrawable() as BitmapDrawable).bitmap
         var RGB0 = img0?.let { singleColor(it, 80, 90) }
-        slBrightness.value += slBrightness.stepSize
-        slBrightness.value += slBrightness.stepSize
-        slContrast.value -= slContrast.stepSize
+
+        runBlocking(Dispatchers.Default) {
+            slBrightness.value += slBrightness.stepSize
+            slBrightness.value += slBrightness.stepSize
+            slContrast.value -= slContrast.stepSize
+
+            Shadows.shadowOf(Looper.getMainLooper()).idle()
+            Thread.sleep(200)
+            Shadows.shadowOf(Looper.getMainLooper()).idle()
+        }
         val img2 = (ivPhoto.getDrawable() as BitmapDrawable).bitmap
         val RGB2 = singleColor(img2, 80, 90)
         val message2 = "val0 ${RGB0} val2 ${RGB2}"
