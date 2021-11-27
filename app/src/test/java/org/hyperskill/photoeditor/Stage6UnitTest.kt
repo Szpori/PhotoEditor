@@ -75,9 +75,9 @@ class Stage6UnitTest {
         val RGB2 = singleColor(img2)
         val message2 = "val0 ${RGB0} val2 ${RGB2}"
         if (RGB0 != null) {
-            assertFalse(message2, Math.abs(RGB0.first + 10 - RGB2.first) <= marginError)
-            assertFalse(message2, Math.abs(RGB0.second + 10 - RGB2.second) <= marginError)
-            assertFalse(message2, Math.abs(RGB0.third + 10 - RGB2.third) <= marginError)
+            assertTrue(message2, Math.abs(RGB0.first - RGB2.first) <= marginError)
+            assertTrue(message2, Math.abs(RGB0.second - RGB2.second) <= marginError)
+            assertTrue(message2, Math.abs(RGB0.third - RGB2.third) <= marginError)
         }
         slBrightness.value -= slBrightness.stepSize
     }
